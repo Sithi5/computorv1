@@ -48,6 +48,10 @@ def test_calculator():
     ret = resolver.solve(expression="5 * 5^0")
     assert ret == 5
 
+    # Simple test exponential
+    ret = resolver.solve(expression="5 * 5^10")
+    assert ret == 48828125
+
     # Simple test with priority
     ret = resolver.solve(expression="5 * 5 + 10")
     assert ret == 35
@@ -86,13 +90,21 @@ def test_calculator():
         ret = resolver.solve(expression="5 + (5 + 10) + 2)(15*2")
     assert str(e.value) == "Closing parenthesis with no opened one."
 
-    # Test multiplying by a signed number
-    ret = resolver.solve(expression="5 * -10")
-    assert ret == -50
+    # # Test multiplying by a signed number
+    # ret = resolver.solve(expression="5 * -10")
+    # assert ret == -50
 
-    # Test multiplying by a signed number
-    ret = resolver.solve(expression="5 * +10")
-    assert ret == 50
+    # # Test multiplying by a signed number
+    # ret = resolver.solve(expression="5 * +10")
+    # assert ret == 50
+
+    # # Implicit multiplication with open parenthesis
+    # ret = resolver.solve(expression="25(5 + 2)")
+    # assert ret == 175
+
+    # # Implicit multiplication with closing parenthesis
+    # ret = resolver.solve(expression="(5 + 2)25")
+    # assert ret == 175
 
 
 def test_wrong_args():
@@ -147,11 +159,3 @@ def test_wrong_args():
     with pytest.raises(SyntaxError) as e:
         ret = resolver.solve(expression=".45 + 12")
     assert str(e.value) == "Some numbers are not well formated (Comma error)."
-
-    # Implicit multiplication with parenthesis
-    with pytest.raises(Exception) as e:
-        ret = resolver.solve(expression="25(5 + 2)")
-    assert (
-        str(e.value)
-        == "Unexpected error when trying to resolve npi. Maybe your input format is not accepted?"
-    )
