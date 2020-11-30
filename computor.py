@@ -67,9 +67,18 @@ class _Calculator:
                 del stack[-2:]
                 # Power is not noted the same in python
                 if elem == "^":
-                    result = eval(str(last_two_in_stack[0]) + "**" + str(last_two_in_stack[1]))
-                else:
-                    result = eval(str(last_two_in_stack[0]) + str(elem) + str(last_two_in_stack[1]))
+                    result = float(last_two_in_stack[0]) ** float(last_two_in_stack[1])
+                elif elem == "*":
+                    result = float(last_two_in_stack[0]) * float(last_two_in_stack[1])
+                elif elem == "/":
+                    result = float(last_two_in_stack[0]) / float(last_two_in_stack[1])
+                elif elem == "%":
+                    result = float(last_two_in_stack[0]) % float(last_two_in_stack[1])
+                elif elem == "+":
+                    result = float(last_two_in_stack[0]) + float(last_two_in_stack[1])
+                elif elem == "-":
+                    result = float(last_two_in_stack[0]) - float(last_two_in_stack[1])
+
                 stack.append(result)
 
         if len(stack) > 1:
@@ -95,8 +104,10 @@ class _Calculator:
         return tokens
 
     def npi_converter(self, tokens: list) -> list:
+        """
+        Convert an expression to npi.
+        """
 
-        # Actually applying npi
         res = []
         stack = []
         for token in tokens:
@@ -130,7 +141,6 @@ class _Calculator:
         self._check_vars()
         npi_list = self.npi_converter(self.convert_to_tokens())
         result = self._resolve_npi(npi_list=npi_list)
-        print("result = ", result)
         return result
 
 
@@ -220,10 +230,49 @@ class ExpressionResolver:
                 .replace("-+", "-")
             )
 
+    def _convert_signed_number(self):
+        """
+        This method convert signed number to a sentence readable for npi process.
+        Exemple :
+            5 * -5 is converted to 5 * (0 - 5)
+            10 / +5 is converted to 10 / (0 + 5)
+        """
+
+        pass
+
+    def _add_cross_operator_when_parenthesis(self):
+        """
+            Checking for numbers before open or after closing parenthesis without signe and add a
+            multiplicator operator.
+        """
+        splitted_expression = self.expression.split("(")
+        index = 1
+        while index < len(splitted_expression):
+            # Getting previous part to check sign
+            if splitted_expression[index - 1][-1].isdecimal() is True:
+                splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
+            index += 1
+        self.expression = "(".join(splitted_expression)
+        splitted_expression = self.expression.split(")")
+        index = 0
+        while index < len(splitted_expression) - 1:
+            # Getting previous part to check sign
+            if (
+                splitted_expression[index + 1]
+                and splitted_expression[index + 1][0].isdecimal() is True
+            ):
+                splitted_expression[index + 1] = "*" + splitted_expression[index + 1]
+            index += 1
+        self.expression = ")".join(splitted_expression)
+
     def _parse_expression(self):
         # Removing all spaces
+        print("Before parsing = ", self.expression)
         self.expression = self.expression.replace(" ", "")
         self._parse__sign()
+        self._add_cross_operator_when_parenthesis()
+        self._convert_signed_number()
+        print("After parsing = ", self.expression)
         self._check_args()
 
     def _set_solver(self):
