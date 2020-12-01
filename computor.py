@@ -1,7 +1,7 @@
 import argparse, parser, re
 
 
-_OPERATORS = "/*%^="
+_OPERATORS = "/*%^"
 _OPERATORS_PRIORITY = {"/": 2, "*": 2, "%": 2, "^": 3, "+": 1, "-": 1}
 _SIGN = "+-"
 _COMMA = ".,"
@@ -111,7 +111,6 @@ class _Calculator:
         res = []
         stack = []
         for token in tokens:
-            print(token)
             if token in _OPERATORS or token in _SIGN:
                 # This loop will unpill elem from stack to res if operators on the pile have bigger priority.
                 while (
@@ -147,7 +146,11 @@ class _Calculator:
 class ExpressionResolver:
 
     expression = None
+    _verbose = None
     _solver = None
+
+    def __init__(self, verbose: bool = False):
+        self._verbose = verbose
 
     def _check_args(self):
         # Var to check operator is followed by alphanum.
@@ -163,21 +166,22 @@ class ExpressionResolver:
                     for part in comma_split:
                         if part == comma_split[0]:
                             assert len(part) >= 1
-                            assert part[-1].isdigit()
+                            assert part[-1].isdecimal()
                         elif part == comma_split[-1]:
                             assert len(part) >= 1
-                            assert part[0].isdigit()
+                            assert part[0].isdecimal()
                         else:
                             assert len(part) >= 2
-                            assert part[0].isdigit()
-                            assert part[-1].isdigit()
+                            assert part[0].isdecimal()
+                            assert part[-1].isdecimal()
             except AssertionError:
                 raise SyntaxError("Some numbers are not well formated (Comma error).")
 
         for c in self.expression:
             # Check allowed char.
             if (
-                c not in _OPERATORS
+                c not in "="
+                and c not in _OPERATORS
                 and c not in _SIGN
                 and c not in _OPEN_PARENTHESES
                 and c not in _CLOSING_PARENTHESES
@@ -187,12 +191,17 @@ class ExpressionResolver:
                 raise SyntaxError(
                     "This is not an expression or some of the operators are not reconized."
                 )
-            # Check multiple _operators before alphanum. Check parenthesis count.
-            if c in _OPERATORS and last_operator and last_operator in _OPERATORS:
+            # Check multiple operators before alphanum. Check parenthesis count.
+            # Checking also that a sign isn't followed by an operator
+            if (
+                c in _OPERATORS
+                and last_operator
+                and (last_operator in _OPERATORS or last_operator in _SIGN)
+            ):
                 raise SyntaxError(
                     "Operators must be followed by a value or a variable, not another operator."
                 )
-            elif c in _OPERATORS:
+            elif c in _OPERATORS or c in _SIGN:
                 last_operator = c
             elif c.isalnum():
                 last_operator = None
@@ -237,22 +246,47 @@ class ExpressionResolver:
             5 * -5 is converted to 5 * (0 - 5)
             10 / +5 is converted to 10 / (0 + 5)
         """
-
-        pass
+        for operator in _OPERATORS + _OPEN_PARENTHESES:
+            for sign in _SIGN:
+                split = self.expression.split(operator + sign)
+                if len(split) > 1:
+                    # Starting with 2nd part
+                    index = 1
+                    while index < len(split):
+                        # Getting number
+                        number = ""
+                        i = 0
+                        while i < len(split[index]):
+                            if not split[index][i].isdecimal():
+                                break
+                            number = number + split[index][i]
+                            i += 1
+                        # Replacing signed number by the new sentence
+                        split[index] = operator + "(0" + sign + number + ")" + split[index][i:]
+                        index += 1
+                self.expression = "".join(split)
 
     def _add_cross_operator_when_parenthesis(self):
         """
-            Checking for numbers before open or after closing parenthesis without signe and add a
+            Checking for numbers before open or after closing parenthesis without sign and add a
             multiplicator operator.
         """
+        # Checking open parenthesis
         splitted_expression = self.expression.split("(")
         index = 1
         while index < len(splitted_expression):
-            # Getting previous part to check sign
-            if splitted_expression[index - 1][-1].isdecimal() is True:
-                splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
+            # Checking if previous part is not empty
+            if len(splitted_expression[index - 1]) > 0:
+                # Getting previous part to check sign
+                if (
+                    splitted_expression[index - 1][-1].isdecimal() is True
+                    or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
+                ):
+                    splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
             index += 1
         self.expression = "(".join(splitted_expression)
+
+        # Checking closing parenthesis
         splitted_expression = self.expression.split(")")
         index = 0
         while index < len(splitted_expression) - 1:
@@ -266,14 +300,28 @@ class ExpressionResolver:
         self.expression = ")".join(splitted_expression)
 
     def _parse_expression(self):
+        print("Expression before parsing : ", self.expression) if self._verbose is True else None
+
         # Removing all spaces
-        print("Before parsing = ", self.expression)
         self.expression = self.expression.replace(" ", "")
+
+        print(
+            "Removing all space from the expression : ", self.expression
+        ) if self._verbose is True else None
         self._parse__sign()
-        self._add_cross_operator_when_parenthesis()
+
+        print("Parsing signs : ", self.expression) if self._verbose is True else None
         self._convert_signed_number()
-        print("After parsing = ", self.expression)
+
+        print("Convert signed numbers : ", self.expression) if self._verbose is True else None
+        self._add_cross_operator_when_parenthesis()
+
+        print(
+            "Convert implicit multiplication : ", self.expression
+        ) if self._verbose is True else None
+
         self._check_args()
+        print("After parsing = ", self.expression) if self._verbose is True else None
 
     def _set_solver(self):
         """
@@ -301,11 +349,23 @@ class ExpressionResolver:
 def main(argv=None):
     print()
     parser = argparse.ArgumentParser()
-    parser.add_argument("expression", help="Insert expression to resolve")
+    parser.add_argument("expression", type=str, help="Insert expression to resolve.")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Add verbose and print different resolving step.",
+        action="store_true",
+    )
     args = parser.parse_args(argv)
 
-    resolver = ExpressionResolver()
-    print("args = ", resolver.solve(args.expression))
+    resolver = ExpressionResolver(verbose=args.verbose)
+    try:
+        result = resolver.solve(args.expression)
+        print("result = ", result)
+    except SyntaxError as e:
+        print("The expression syntax is not accepted : ", e)
+    except NotImplementedError as e:
+        print("One of the methods needed is not implemented yet : ", e)
 
 
 if __name__ == "__main__":
