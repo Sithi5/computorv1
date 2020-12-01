@@ -1,10 +1,10 @@
 import pytest
 
-from ..computor import ExpressionResolver
+from expression_resolver import ExpressionResolver
 
 
 def test_calculator():
-    resolver = ExpressionResolver()
+    resolver = ExpressionResolver(verbose=True)
 
     # Simple test
     ret = resolver.solve(expression="5 * 5^0")
@@ -18,6 +18,10 @@ def test_calculator():
     ret = resolver.solve(expression="5 * 5 + 10")
     assert ret == 35
 
+    # Simple test with float
+    ret = resolver.solve(expression="5.3 * 5.2 + 10.8")
+    assert ret == 38.36
+
     # Test with parenthesis
     ret = resolver.solve(expression="5 * (5 + 10)")
     assert ret == 75
@@ -26,11 +30,19 @@ def test_calculator():
     ret = resolver.solve(expression="5 * (5 + (10 * 50 + 2))")
     assert ret == 2535
 
+    # Test with multiple useless parenthesis
+    ret = resolver.solve(expression="((((5 * (5 + (10 * 50 + 2))))))")
+    assert ret == 2535
+
     # Hard test with multiple parenthesis
     ret = resolver.solve(
         expression="5 * (5 + (10 * 50 + 24.15) *    50 * 18 *(12 + 52)) * (18 - (5 + 2))"
     )
     assert ret == 1660507475
+
+    # Hard test with float
+    ret = resolver.solve(expression="545875785748.34444444478 * 5.2542 + 10456.81212")
+    assert ret == 2868140563935.763
 
     # Test with wrong parenthesis number
     with pytest.raises(SyntaxError) as e:
@@ -83,6 +95,10 @@ def test_calculator():
     # Test substract by a signed number in parenthesis
     ret = resolver.solve(expression="(-10)(-10)")
     assert ret == 100
+
+    # Test multiplying by a signed float
+    ret = resolver.solve(expression="5 * -10.35843958432134 + 599")
+    assert ret == 547.2078020783933
 
     # Test implicit parenthesis multiply
     ret = resolver.solve(expression="(5+1)(2-5)")

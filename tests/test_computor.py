@@ -1,19 +1,31 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    test_computor.py                                   :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
+#    Updated: 2020/12/01 22:32:38 by mabouce          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 import pytest
 
-from ..computor import ExpressionResolver
+from expression_resolver import ExpressionResolver
 
 
-def test_expression_resolver():
-    resolver = ExpressionResolver()
-
-    # Test sign before
-    ret = resolver.solve(expression="+X = Hello world")
+def test_expression_parser():
+    resolver = ExpressionResolver(verbose=True)
 
     # Test sign before
-    ret = resolver.solve(expression="-X = Hello world")
+    ret = resolver.solve(expression="+X = 10")
+
+    # Test sign before
+    ret = resolver.solve(expression="-X = 10")
 
     # Test addition with sign before var
-    ret = resolver.solve(expression="X -Y = X")
+    ret = resolver.solve(expression="X -5 = -X")
 
     # lot of sign
     ret = resolver.solve(expression="4-+-2 ------+-----++++++ X^0 = 0")
@@ -21,28 +33,21 @@ def test_expression_resolver():
     # lot of sign
     ret = resolver.solve(expression="4-+-2 ------+-----++++++ X^+-+++-0 = 0")
 
+    # Extra zero
+    ret = resolver.solve(expression="04578 + 000450")
+    assert ret == 5028
 
-def test_equations():
-    resolver = ExpressionResolver()
+    # Test method _replace_zero_power_by_one
+    ret = resolver.solve(expression="04578 + 15000 ^0")
+    assert ret == 4579
 
-    # Polynomial degree 2
-    ret = resolver.solve(expression="5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0")
-
-    # Polynomial degree 1
-    ret = resolver.solve(expression="5 * X^0 + 4 * X^1 = 4 * X^0")
-
-    # Polynomial degree 3
-    ret = resolver.solve(expression="8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0")
-
-    # Polynomial degree 1, result should be N
-    ret = resolver.solve(expression="42 * X^0 = 42 * X^0")
-
-    # Test big name var
-    ret = resolver.solve(expression="Hello world*10+1245 = Hello world")
+    # Test method _replace_zero_power_by_one, the following one shouln't proc because it use a parenthesis
+    ret = resolver.solve(expression="04578 + (15000 * 450)^0")
+    assert ret == 4579
 
 
 def test_wrong_args():
-    resolver = ExpressionResolver()
+    resolver = ExpressionResolver(verbose=True)
 
     # Wrong args
     with pytest.raises(SyntaxError) as e:
@@ -82,7 +87,7 @@ def test_wrong_args():
     # multiple comma in one number
     with pytest.raises(SyntaxError) as e:
         ret = resolver.solve(expression="450.25.45 + 12")
-    assert str(e.value) == "Some numbers are not well formated (Comma error)."
+    assert str(e.value) == "An error occured with the following syntax : 450.25.45"
 
     # wrong use of comma
     with pytest.raises(SyntaxError) as e:
