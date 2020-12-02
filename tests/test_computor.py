@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/01 22:32:38 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 12:10:04 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -119,3 +119,8 @@ def test_wrong_args():
     assert (
         str(e.value) == "Operators must be followed by a value or a variable, not another operator."
     )
+
+    # Test var with parenthesis
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="5 * x(5 + 10)")
+    assert str(e.value) == "Parenthesis is not supported with the use of var."

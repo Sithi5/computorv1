@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:45 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/01 21:49:10 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 11:01:19 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,6 +35,8 @@ def main(argv=None):
         print("The expression syntax is not accepted : ", e)
     except NotImplementedError as e:
         print("One of the methods needed is not implemented yet : ", e)
+    except Exception as e:
+        print("An exception appened : ", e)
 
 
 if __name__ == "__main__":

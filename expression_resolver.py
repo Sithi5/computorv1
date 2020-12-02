@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/01 22:31:33 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 12:47:55 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,7 @@ from globals_vars import (
 class ExpressionResolver:
 
     expression = None
+    _vars_set = None
     _verbose = None
     _solver = None
 
@@ -58,8 +59,8 @@ class ExpressionResolver:
             except AssertionError:
                 raise SyntaxError("Some numbers are not well formated (Comma error).")
 
+        # Check allowed char.
         for c in self.expression:
-            # Check allowed char.
             if (
                 c not in "="
                 and c not in _OPERATORS
@@ -143,11 +144,25 @@ class ExpressionResolver:
                             number = number + split[index][i]
                             i += 1
                         # Replacing signed number by the new sentence
-                        split[index] = operator + "(0" + sign + number + ")" + split[index][i:]
+                        if len(number) > 0:
+                            split[index] = operator + "(0" + sign + number + ")" + split[index][i:]
+                        # If no number, maybe it's a var. Do nothing here.
+                        else:
+                            for var in self._vars_set:
+                                if split[index][: len(var)] == var:
+                                    split[index] = (
+                                        operator
+                                        + "(0"
+                                        + sign
+                                        + var
+                                        + ")"
+                                        + split[index][len(var) :]
+                                    )
                         index += 1
+
                 self.expression = "".join(split)
 
-    def _add_cross_operator_when_parenthesis(self):
+    def _add_implicit_cross_operator_when_parenthesis(self):
         """
             Checking for numbers before open or after closing parenthesis without sign and add a
             multiplicator operator.
@@ -180,15 +195,44 @@ class ExpressionResolver:
             index += 1
         self.expression = ")".join(splitted_expression)
 
+    def _add_implicit_cross_operator_for_vars(self):
+        # Splitting from vars
+        for var in self._vars_set:
+            splitted_expression = self.expression.split(var)
+            index = 1
+            while index < len(splitted_expression) - 1:
+                # Checking if previous part is not empty
+                if len(splitted_expression[index - 1]) > 0:
+                    # Getting previous part to check sign
+                    if (
+                        splitted_expression[index - 1][-1].isdecimal() is True
+                        or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
+                    ):
+                        splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
+                    elif (
+                        splitted_expression[index][0].isdecimal() is True
+                        or splitted_expression[index][0] in _OPEN_PARENTHESES
+                    ):
+                        splitted_expression[index] = "*" + splitted_expression[index]
+                index += 1
+            self.expression = var.join(splitted_expression)
+
     def _convert_to_tokens(self) -> list:
         tokens = []
         current_char = 0
         last_char = 0
         while current_char < len(self.expression):
+            # Getting full number
             if self.expression[current_char].isdecimal():
                 while current_char < len(self.expression) and (
                     self.expression[current_char].isdecimal()
                     or self.expression[current_char] in _COMMA
+                ):
+                    current_char += 1
+            # Getting full var name
+            elif self.expression[current_char].isalpha():
+                while current_char < len(self.expression) and (
+                    self.expression[current_char].isalpha()
                 ):
                     current_char += 1
             else:
@@ -202,16 +246,10 @@ class ExpressionResolver:
             if token.isdecimal():
                 self.expression[index] = str(float(token))
 
-    def _replace_zero_power_by_one(self):
-        for index, token in enumerate(self.expression):
-            if index < len(self.expression) - 1:
-                if (
-                    token == "^"
-                    and self.expression[index + 1] == str(float(0))
-                    and self.expression[index - 1].isdecimal()
-                ):
-                    self.expression[index - 1] = "1"
-                    del self.expression[index : index + 2]
+    def _get_vars(self):
+        vars_list = re.findall(pattern=r"[A-Z]+", string=self.expression)
+        # Removing duplicate var
+        self._vars_set = list(set(vars_list))
 
     def _parse_expression(self):
         print("Expression before parsing : ", self.expression) if self._verbose is True else None
@@ -222,13 +260,20 @@ class ExpressionResolver:
         print(
             "Removing all space from the expression : ", self.expression
         ) if self._verbose is True else None
-        self._parse__sign()
 
+        self._parse__sign()
         print("Parsing signs : ", self.expression) if self._verbose is True else None
+
+        # To put before convert_signed_number because it is creating parenthesis
+        self._get_vars()
+        print("vars = ", self._vars_set) if self._verbose is True else None
+
         self._convert_signed_number()
 
         print("Convert signed numbers : ", self.expression) if self._verbose is True else None
-        self._add_cross_operator_when_parenthesis()
+
+        self._add_implicit_cross_operator_when_parenthesis()
+        self._add_implicit_cross_operator_for_vars()
 
         print(
             "Convert implicit multiplication : ", self.expression
@@ -244,10 +289,6 @@ class ExpressionResolver:
         print(
             "Removing extra zero and converting numbers to float: ", self.expression
         ) if self._verbose is True else None
-
-        self._replace_zero_power_by_one()
-
-        print("Replacing zero power by one : ", self.expression) if self._verbose is True else None
 
     def _set_solver(self):
         """

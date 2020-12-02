@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/01 22:24:10 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 10:42:16 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,8 +31,9 @@ def _is_number(n: str) -> bool:
 
 
 class _Calculator:
-    _calc = None
-    _execution_pile = []
+
+    _tokens = None
+    _npi_list = None
 
     def stack_last_element(self, elem: list) -> str:
         try:
@@ -40,10 +41,10 @@ class _Calculator:
         except IndexError:
             return []
 
-    def _resolve_npi(self, npi_list: list):
+    def _resolve_npi(self):
         stack = []
 
-        for elem in npi_list:
+        for elem in self._npi_list:
             if _is_number(elem):
                 stack.append(elem)
             else:
@@ -71,14 +72,14 @@ class _Calculator:
             )
         return stack[0]
 
-    def npi_converter(self) -> list:
+    def _npi_converter(self):
         """
         Convert an expression to npi.
         """
 
         res = []
         stack = []
-        for token in self.tokens:
+        for token in self._tokens:
             if token in _OPERATORS or token in _SIGN:
                 # This loop will unpill elem from stack to res if operators on the pile have bigger priority.
                 while (
@@ -101,10 +102,10 @@ class _Calculator:
                     raise SyntaxError(f"Some numbers are not well formated : {token}")
                 res.append(token)
 
-        return res + stack[::-1]
+        self._npi_list = res + stack[::-1]
 
     def _check_vars(self):
-        for token in self.tokens:
+        for token in self._tokens:
             if (
                 not token in _OPEN_PARENTHESES + _CLOSING_PARENTHESES + _OPERATORS + _SIGN
                 and not _is_number(token)
@@ -115,8 +116,8 @@ class _Calculator:
                     raise SyntaxError(f"An error occured with the following syntax : {token}")
 
     def solve(self, token: str) -> int:
-        self.tokens = token
+        self._tokens = token
         self._check_vars()
-        npi_list = self.npi_converter()
-        result = self._resolve_npi(npi_list=npi_list)
+        self._npi_converter()
+        result = self._resolve_npi()
         return result
