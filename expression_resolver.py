@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 12:47:55 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 15:06:38 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -128,6 +128,12 @@ class ExpressionResolver:
             5 * -5 is converted to 5 * (0 - 5)
             10 / +5 is converted to 10 / (0 + 5)
         """
+        # Checking for first sign
+        if len(self.expression) > 1:
+            if self.expression[0] in _SIGN and (
+                self.expression[1].isdecimal() or self.expression[1] in _OPEN_PARENTHESES
+            ):
+                self.expression = "0" + self.expression
         for operator in _OPERATORS + _OPEN_PARENTHESES:
             for sign in _SIGN:
                 split = self.expression.split(operator + sign)
@@ -148,16 +154,7 @@ class ExpressionResolver:
                             split[index] = operator + "(0" + sign + number + ")" + split[index][i:]
                         # If no number, maybe it's a var. Do nothing here.
                         else:
-                            for var in self._vars_set:
-                                if split[index][: len(var)] == var:
-                                    split[index] = (
-                                        operator
-                                        + "(0"
-                                        + sign
-                                        + var
-                                        + ")"
-                                        + split[index][len(var) :]
-                                    )
+                            split[index] = operator + sign + split[index][i:]
                         index += 1
 
                 self.expression = "".join(split)

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 10:42:16 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 18:27:48 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,10 +41,10 @@ class _Calculator:
         except IndexError:
             return []
 
-    def _resolve_npi(self):
+    def resolve_npi(self, npi_list):
         stack = []
 
-        for elem in self._npi_list:
+        for elem in npi_list:
             if _is_number(elem):
                 stack.append(elem)
             else:
@@ -63,7 +63,6 @@ class _Calculator:
                     result = float(last_two_in_stack[0]) + float(last_two_in_stack[1])
                 elif elem == "-":
                     result = float(last_two_in_stack[0]) - float(last_two_in_stack[1])
-
                 stack.append(result)
 
         if len(stack) > 1:
@@ -72,14 +71,14 @@ class _Calculator:
             )
         return stack[0]
 
-    def _npi_converter(self):
+    def npi_converter(self, tokens, accept_var=False):
         """
         Convert an expression to npi.
         """
 
         res = []
         stack = []
-        for token in self._tokens:
+        for token in tokens:
             if token in _OPERATORS or token in _SIGN:
                 # This loop will unpill elem from stack to res if operators on the pile have bigger priority.
                 while (
@@ -99,10 +98,12 @@ class _Calculator:
                     stack.pop()
             else:
                 if not _is_number(token):
-                    raise SyntaxError(f"Some numbers are not well formated : {token}")
+                    # Checking if it's alpha, then adding it as a var
+                    if (accept_var is True and not token.isalpha()) or accept_var is False:
+                        raise SyntaxError(f"Some numbers are not well formated : {token}")
                 res.append(token)
 
-        self._npi_list = res + stack[::-1]
+        return res + stack[::-1]
 
     def _check_vars(self):
         for token in self._tokens:
@@ -111,13 +112,12 @@ class _Calculator:
                 and not _is_number(token)
             ):
                 if token.isalpha():
-                    raise SyntaxError("Calculator does not support variables.")
+                    raise NotImplementedError("Calculator does not support variables.")
                 else:
                     raise SyntaxError(f"An error occured with the following syntax : {token}")
 
-    def solve(self, token: str) -> int:
-        self._tokens = token
+    def solve(self, tokens: list) -> int:
+        self._tokens = tokens
         self._check_vars()
-        self._npi_converter()
-        result = self._resolve_npi()
+        result = self.resolve_npi(self.npi_converter(self._tokens))
         return result

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 12:10:04 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 15:36:51 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -67,14 +67,13 @@ def test_wrong_args():
     )
 
     # Tests var in calculator
-    with pytest.raises(SyntaxError) as e:
+    with pytest.raises(NotImplementedError) as e:
         resolver.solve(expression="X+18+ 5")
     assert str(e.value) == "Calculator does not support variables."
 
     # More than one = in the expression
     with pytest.raises(NotImplementedError) as e:
         resolver.solve(expression="42 * X = 42 * Y = 42 * Z")
-        out, err = capsys.readouterr()
     assert str(e.value) == "More than one comparison is not supported for the moment."
 
     # lot of sign and operator between
@@ -123,4 +122,4 @@ def test_wrong_args():
     # Test var with parenthesis
     with pytest.raises(NotImplementedError) as e:
         ret = resolver.solve(expression="5 * x(5 + 10)")
-    assert str(e.value) == "Parenthesis is not supported with the use of var."
+    assert str(e.value) == "Calculator does not support variables."
