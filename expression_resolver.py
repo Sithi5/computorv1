@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 15:06:38 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 18:50:48 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -287,6 +287,9 @@ class ExpressionResolver:
             "Removing extra zero and converting numbers to float: ", self.expression
         ) if self._verbose is True else None
 
+    def _check_equation_format(self):
+        pass
+
     def _set_solver(self):
         """
             Setting the right class to solve the expression
@@ -296,6 +299,9 @@ class ExpressionResolver:
         if len(equal_operator) == 0:
             self._solver = _Calculator()
         elif len(equal_operator) == 1:
+            # Equation, assuming the format is correct.
+            self._check_equation_format()
+            print(self.expression)
             self._solver = _EquationSolver(_Calculator())
         else:
             raise NotImplementedError("More than one comparison is not supported for the moment.")

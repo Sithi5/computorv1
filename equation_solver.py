@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 18:48:21 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/02 18:48:51 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -97,13 +97,5 @@ class _EquationSolver:
 
     def solve(self, tokens):
         self._tokens = tokens
-        print("equation in equation solver = ", self._tokens)
-        self._check_vars()
-        self._solving_parenthesis()
-        print("equation in equation solver after solving parenthesis = ", self._tokens)
-        self._set_parts()
-        print("different parts =\nleft = ", self._left_part, "\nright = ", self._right_part)
-        npi_left_part = self._calculator.npi_converter(self._left_part, accept_var=True)
-        print("npi left part = ", npi_left_part)
 
         return self._tokens
