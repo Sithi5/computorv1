@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 16:57:39 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/03 18:41:14 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,8 @@ from globals_vars import (
     _CLOSING_PARENTHESES,
 )
 
-from calculator import _is_number
+from calculator import is_number
+from utils import convert_to_tokens
 
 
 class _EquationSolver:
@@ -93,57 +94,141 @@ class _EquationSolver:
             else:
                 index += 1
 
+    def _check_have_var(self, var) -> bool:
+        if self._var_name in var:
+            return True
+        return False
+
+    def _check_var_power(self, var):
+        if not self._check_have_var(var):
+            raise ValueError("Did not input a Var.")
+        split = var.split("^")
+        if len(split) == 1:
+            return 1
+        else:
+            return int(split[1])
+
+    def _multiply_a_var(self, first_var: str, second_var: str):
+        print("first_var = ", first_var, "second_var = ", second_var)
+        try:
+            first_var_power = self._check_var_power(first_var)
+        except ValueError:
+            first_var_power = 1
+        try:
+            second_var_power = self._check_var_power(second_var)
+        except ValueError:
+            second_var_power = 1
+        if first_var_power == 0:
+            return second_var
+        elif second_var_power == 0:
+            return first_var
+        new_power = self._calculator.solve([str(first_var_power), "*", str(second_var_power)])
+        print(new_power)
+        # TODO fix power problem
+
+        if not self._check_have_var(first_var):
+            # No number before
+            if len(second_var) == len(self._var_name):
+                return first_var + "*" + second_var
+            else:
+                remove_var_name = second_var.replace(self._var_name, "1")
+                tokens = []
+                tokens.append(first_var)
+                tokens.append("*")
+                tokens = tokens + convert_to_tokens(remove_var_name)
+                return str(self._calculator.solve(tokens)) + "*" + self._var_name
+        elif not self._check_have_var(second_var):
+            if len(first_var) == len(self._var_name):
+                return second_var + "*" + first_var
+            else:
+                remove_var_name = first_var.replace(self._var_name, "1")
+                tokens = []
+                tokens.append(second_var)
+                tokens.append("*")
+                tokens = tokens + convert_to_tokens(remove_var_name)
+                return str(self._calculator.solve(tokens)) + "*" + self._var_name
+        # Both have var.
+        else:
+            if len(first_var) == len(self._var_name) == len(second_var):
+                return first_var + "^" + str(new_power)
+            elif len(first_var) == len(self._var_name):
+                return second_var + "^" + str(new_power)
+            elif len(second_var) == len(self._var_name):
+                return first_var + "^" + str(new_power)
+            else:
+                remove_var1_name = first_var.replace(self._var_name, "1")
+                remove_var2_name = second_var.replace(self._var_name, "1")
+                tokens = []
+                tokens = tokens + convert_to_tokens(remove_var1_name)
+                tokens.append("*")
+                tokens = tokens + convert_to_tokens(remove_var2_name)
+                return (
+                    str(self._calculator.solve(tokens))
+                    + "*"
+                    + self._var_name
+                    + "^"
+                    + str(new_power)
+                )
+
     def resolve_npi_with_var(self, npi_list):
         stack = []
-        rest_stack = []
+        c = 0
 
-        last_was_var = False
         for elem in npi_list:
-            print("elem = ", elem)
-            print("last was var ? ", last_was_var)
-            if _is_number(elem):
-                if last_was_var is True:
-                    rest_stack.append(elem)
-                else:
-                    stack.append(elem)
-            elif elem in self._var_name:
-                rest_stack.append(elem)
-                last_was_var = True
+            if is_number(elem) or elem in self._var_name:
+                stack.append(elem)
             else:
-                if last_was_var is True and _OPERATORS_PRIORITY[elem] > 1:
-                    rest_stack.append(elem)
-                    if len(stack) > 0:
-                        rest_stack.append(stack.pop())
-                else:
-                    print("Operator ? ")
-                    if last_was_var is True:
-                        stack.append(rest_stack.pop())
-                        rest_stack.append(elem)
-                        last_was_var = False
-                        continue
-                    else:
-                        last_two_in_stack = stack[-2:]
-                        del stack[-2:]
-                        # Power is not noted the same in python
-                        if elem == "^":
-                            result = float(last_two_in_stack[0]) ** float(last_two_in_stack[1])
-                        elif elem == "*":
-                            result = float(last_two_in_stack[0]) * float(last_two_in_stack[1])
-                        elif elem == "/":
-                            result = float(last_two_in_stack[0]) / float(last_two_in_stack[1])
-                        elif elem == "%":
-                            result = float(last_two_in_stack[0]) % float(last_two_in_stack[1])
-                        elif elem == "+":
-                            result = float(last_two_in_stack[0]) + float(last_two_in_stack[1])
-                        elif elem == "-":
-                            result = float(last_two_in_stack[0]) - float(last_two_in_stack[1])
-                        stack.append(result)
-            print("end loop stack = ", stack)
-            print("end loop rest = ", rest_stack)
+                last_two_in_stack = stack[-2:]
+                del stack[-2:]
+                if self._check_have_var(str(last_two_in_stack[0])) or self._check_have_var(
+                    str(last_two_in_stack[1])
+                ):
+                    # Doing var calc
+                    # - or + operator, adding to c
+                    if elem in _SIGN:
 
-        print("end stack = ", stack)
-        print("end rest = ", rest_stack)
-        return rest_stack + stack
+                        if not self._check_have_var(str(last_two_in_stack[0])):
+                            if elem == "-":
+                                c -= float(last_two_in_stack[0])
+                            else:
+                                c += float(last_two_in_stack[0])
+                            result = str(last_two_in_stack[1])
+                        elif not self._check_have_var(str(last_two_in_stack[1])):
+                            if elem == "-":
+                                c -= float(last_two_in_stack[1])
+                            else:
+                                c += float(last_two_in_stack[1])
+                            result = str(last_two_in_stack[0])
+                        else:
+                            result = str(last_two_in_stack[0]) + elem + str(last_two_in_stack[1])
+                    # mult of var
+                    elif elem == "*":
+                        result = self._multiply_a_var(
+                            str(last_two_in_stack[0]), str(last_two_in_stack[1])
+                        )
+                    else:
+                        result = str(last_two_in_stack[0]) + elem + str(last_two_in_stack[1])
+
+                # Power is not noted the same in python
+                elif elem == "^":
+                    result = float(last_two_in_stack[0]) ** float(last_two_in_stack[1])
+                elif elem == "*":
+                    result = float(last_two_in_stack[0]) * float(last_two_in_stack[1])
+                elif elem == "/":
+                    result = float(last_two_in_stack[0]) / float(last_two_in_stack[1])
+                elif elem == "%":
+                    result = float(last_two_in_stack[0]) % float(last_two_in_stack[1])
+                elif elem == "+":
+                    result = float(last_two_in_stack[0]) + float(last_two_in_stack[1])
+                elif elem == "-":
+                    result = float(last_two_in_stack[0]) - float(last_two_in_stack[1])
+                stack.append(result)
+
+        if len(stack) > 1:
+            raise Exception(
+                "Unexpected error when trying to resolve npi. Maybe your input format is not accepted?"
+            )
+        return stack[0]
 
     def solve(self, tokens):
         self._tokens = tokens

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 18:50:48 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/03 18:12:15 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,8 @@ from globals_vars import (
     _OPEN_PARENTHESES,
     _CLOSING_PARENTHESES,
 )
+
+from utils import convert_to_tokens
 
 
 class ExpressionResolver:
@@ -214,30 +216,6 @@ class ExpressionResolver:
                 index += 1
             self.expression = var.join(splitted_expression)
 
-    def _convert_to_tokens(self) -> list:
-        tokens = []
-        current_char = 0
-        last_char = 0
-        while current_char < len(self.expression):
-            # Getting full number
-            if self.expression[current_char].isdecimal():
-                while current_char < len(self.expression) and (
-                    self.expression[current_char].isdecimal()
-                    or self.expression[current_char] in _COMMA
-                ):
-                    current_char += 1
-            # Getting full var name
-            elif self.expression[current_char].isalpha():
-                while current_char < len(self.expression) and (
-                    self.expression[current_char].isalpha()
-                ):
-                    current_char += 1
-            else:
-                current_char += 1
-            tokens.append(self.expression[last_char:current_char])
-            last_char = current_char
-        self.expression = tokens
-
     def _removing_trailing_zero_and_converting_numbers_to_float(self):
         for index, token in enumerate(self.expression):
             if token.isdecimal():
@@ -279,7 +257,8 @@ class ExpressionResolver:
         # Checking args here before converting to token
         self._check_args()
 
-        self._convert_to_tokens()
+        # Transforming expression to tokens
+        self.expression = convert_to_tokens(self.expression)
 
         print("Convert to token : ", self.expression) if self._verbose is True else None
         self._removing_trailing_zero_and_converting_numbers_to_float()

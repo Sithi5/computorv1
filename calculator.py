@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 15:30:39 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/03 18:10:58 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,13 +21,7 @@ from globals_vars import (
     _CLOSING_PARENTHESES,
 )
 
-
-def _is_number(n: str) -> bool:
-    try:
-        float(n)
-        return True
-    except ValueError:
-        return False
+from utils import is_number
 
 
 class _Calculator:
@@ -45,7 +39,7 @@ class _Calculator:
         stack = []
 
         for elem in npi_list:
-            if _is_number(elem):
+            if is_number(elem):
                 stack.append(elem)
             else:
                 last_two_in_stack = stack[-2:]
@@ -97,7 +91,7 @@ class _Calculator:
                 if self.stack_last_element(stack) in _OPEN_PARENTHESES:
                     stack.pop()
             else:
-                if not _is_number(token):
+                if not is_number(token):
                     # Checking if it's alpha, then adding it as a var
                     if (accept_var is True and not token.isalpha()) or accept_var is False:
                         raise SyntaxError(f"Some numbers are not well formated : {token}")
@@ -109,7 +103,7 @@ class _Calculator:
         for token in self._tokens:
             if (
                 not token in _OPEN_PARENTHESES + _CLOSING_PARENTHESES + _OPERATORS + _SIGN
-                and not _is_number(token)
+                and not is_number(token)
             ):
                 if token.isalpha():
                     raise NotImplementedError("Calculator does not support variables.")
@@ -118,6 +112,7 @@ class _Calculator:
 
     def solve(self, tokens: list) -> int:
         self._tokens = tokens
+        print("token in calculator = ", tokens)
         self._check_vars()
         result = self.resolve_npi(self.npi_converter(self._tokens))
         return result
