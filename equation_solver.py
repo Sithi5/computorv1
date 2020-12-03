@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 16:54:33 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/03 16:57:39 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -66,7 +66,6 @@ class _EquationSolver:
             raise NotImplementedError("Variable between parenthesis is not supported yet.")
         del self._tokens[start_index:end_index]
         self._tokens.insert(start_index, str(calc_result))
-        print("calc_result = ", calc_result)
 
     def _solving_parenthesis(self):
         index = 0
@@ -113,10 +112,12 @@ class _EquationSolver:
             else:
                 if last_was_var is True and _OPERATORS_PRIORITY[elem] > 1:
                     rest_stack.append(elem)
-                    rest_stack.append(stack.pop())
+                    if len(stack) > 0:
+                        rest_stack.append(stack.pop())
                 else:
                     print("Operator ? ")
                     if last_was_var is True:
+                        stack.append(rest_stack.pop())
                         rest_stack.append(elem)
                         last_was_var = False
                         continue
@@ -142,7 +143,7 @@ class _EquationSolver:
 
         print("end stack = ", stack)
         print("end rest = ", rest_stack)
-        return stack + rest_stack
+        return rest_stack + stack
 
     def solve(self, tokens):
         self._tokens = tokens
