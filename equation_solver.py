@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 18:48:51 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/03 16:50:17 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,8 @@ from globals_vars import (
     _OPEN_PARENTHESES,
     _CLOSING_PARENTHESES,
 )
+
+from calculator import _is_number
 
 
 class _EquationSolver:
@@ -86,16 +88,74 @@ class _EquationSolver:
                     if index >= len(self._tokens):
                         raise SyntaxError("Open parenthesis with not closing one.")
                 end_parenthesis = index
-                print(
-                    "list between parenthesis = ", self._tokens[start_parenthesis:end_parenthesis]
-                )
                 # Sending the calc to the calculator
                 self._send_to_calc(start_parenthesis, end_parenthesis)
                 index = start_parenthesis + 1
             else:
                 index += 1
 
+    def resolve_npi_with_var(self, npi_list):
+        stack = []
+        rest_stack = []
+        rest_stack_list = []
+
+        last_was_var = False
+        for elem in npi_list:
+            print("elem = ", elem)
+            print("last was var ? ", last_was_var)
+            if _is_number(elem):
+                if last_was_var is True:
+                    rest_stack.append(elem)
+                else:
+                    stack.append(elem)
+            elif elem in self._var_name:
+                rest_stack.append(elem)
+                last_was_var = True
+            else:
+                if last_was_var is True and _OPERATORS_PRIORITY[elem] > 1:
+                    rest_stack.append(elem)
+                    rest_stack.append(stack.pop())
+                else:
+                    print("Operator ? ")
+                    if last_was_var is True:
+                        stack.append(rest_stack.pop())
+                        rest_stack.append(elem)
+                        rest_stack_list.append(list(rest_stack))
+                        rest_stack.clear()
+                        last_was_var = False
+                    else:
+                        last_two_in_stack = stack[-2:]
+                        del stack[-2:]
+                        # Power is not noted the same in python
+                        if elem == "^":
+                            result = float(last_two_in_stack[0]) ** float(last_two_in_stack[1])
+                        elif elem == "*":
+                            result = float(last_two_in_stack[0]) * float(last_two_in_stack[1])
+                        elif elem == "/":
+                            result = float(last_two_in_stack[0]) / float(last_two_in_stack[1])
+                        elif elem == "%":
+                            result = float(last_two_in_stack[0]) % float(last_two_in_stack[1])
+                        elif elem == "+":
+                            result = float(last_two_in_stack[0]) + float(last_two_in_stack[1])
+                        elif elem == "-":
+                            result = float(last_two_in_stack[0]) - float(last_two_in_stack[1])
+                        stack.append(result)
+            print("end loop stack = ", stack)
+            print("end loop rest = ", rest_stack)
+
+        print("end stack = ", stack)
+        print("end rest = ", rest_stack)
+        return stack + rest_stack_list
+
     def solve(self, tokens):
         self._tokens = tokens
+        self._check_vars()
+        self._solving_parenthesis()
+        self._set_parts()
+
+        npi = self._calculator.npi_converter(self._left_part, accept_var=True)
+        print("npi = ", npi)
+        print("resolved npi = ", self.resolve_npi_with_var(npi))
+        print("end token = ", self._tokens)
 
         return self._tokens
