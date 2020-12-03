@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 18:41:14 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/03 19:00:42 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -99,62 +99,63 @@ class _EquationSolver:
             return True
         return False
 
-    def _check_var_power(self, var):
-        if not self._check_have_var(var):
-            raise ValueError("Did not input a Var.")
+    def _get_power(self, var):
+        """
+        Returning the power of a number or a var.
+        If there is multiple "^" operators, it return the first power.
+        """
         split = var.split("^")
         if len(split) == 1:
             return 1
         else:
-            return int(split[1])
+            return float(split[1])
 
     def _multiply_a_var(self, first_var: str, second_var: str):
         print("first_var = ", first_var, "second_var = ", second_var)
-        try:
-            first_var_power = self._check_var_power(first_var)
-        except ValueError:
-            first_var_power = 1
-        try:
-            second_var_power = self._check_var_power(second_var)
-        except ValueError:
-            second_var_power = 1
-        if first_var_power == 0:
-            return second_var
-        elif second_var_power == 0:
-            return first_var
-        new_power = self._calculator.solve([str(first_var_power), "*", str(second_var_power)])
-        print(new_power)
-        # TODO fix power problem
+
+        first_var_power = str(self._get_power(first_var))
+        second_var_power = str(self._get_power(second_var))
+        print("first_var_power = ", first_var_power)
+        print("second_var_power = ", second_var_power)
+
+        # Cutting respective power
+        first_var = first_var.split("^")[0]
+        second_var = second_var.split("^")[0]
 
         if not self._check_have_var(first_var):
+            sum_power = second_var_power
             # No number before
             if len(second_var) == len(self._var_name):
-                return first_var + "*" + second_var
+                return first_var + "*" + second_var + "^" + sum_power
             else:
                 remove_var_name = second_var.replace(self._var_name, "1")
                 tokens = []
                 tokens.append(first_var)
                 tokens.append("*")
                 tokens = tokens + convert_to_tokens(remove_var_name)
-                return str(self._calculator.solve(tokens)) + "*" + self._var_name
+                return str(self._calculator.solve(tokens)) + "*" + self._var_name + "^" + sum_power
         elif not self._check_have_var(second_var):
+            sum_power = first_var_power
+
             if len(first_var) == len(self._var_name):
-                return second_var + "*" + first_var
+                return second_var + "*" + first_var + "^" + sum_power
             else:
                 remove_var_name = first_var.replace(self._var_name, "1")
                 tokens = []
                 tokens.append(second_var)
                 tokens.append("*")
                 tokens = tokens + convert_to_tokens(remove_var_name)
-                return str(self._calculator.solve(tokens)) + "*" + self._var_name
+                return str(self._calculator.solve(tokens)) + "*" + self._var_name + "^" + sum_power
         # Both have var.
         else:
+            sum_power = str(self._calculator.solve([first_var_power, "+", second_var_power]))
+
             if len(first_var) == len(self._var_name) == len(second_var):
-                return first_var + "^" + str(new_power)
+                return first_var + "^" + sum_power
             elif len(first_var) == len(self._var_name):
-                return second_var + "^" + str(new_power)
+                return second_var + "^" + sum_power
             elif len(second_var) == len(self._var_name):
-                return first_var + "^" + str(new_power)
+                return first_var + "^" + sum_power
             else:
                 remove_var1_name = first_var.replace(self._var_name, "1")
                 remove_var2_name = second_var.replace(self._var_name, "1")
@@ -162,13 +163,7 @@ class _EquationSolver:
                 tokens = tokens + convert_to_tokens(remove_var1_name)
                 tokens.append("*")
                 tokens = tokens + convert_to_tokens(remove_var2_name)
-                return (
-                    str(self._calculator.solve(tokens))
-                    + "*"
-                    + self._var_name
-                    + "^"
-                    + str(new_power)
-                )
+                return str(self._calculator.solve(tokens)) + "*" + self._var_name + "^" + sum_power
 
     def resolve_npi_with_var(self, npi_list):
         stack = []
