@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 16:50:17 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/03 16:54:33 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -97,7 +97,6 @@ class _EquationSolver:
     def resolve_npi_with_var(self, npi_list):
         stack = []
         rest_stack = []
-        rest_stack_list = []
 
         last_was_var = False
         for elem in npi_list:
@@ -118,11 +117,9 @@ class _EquationSolver:
                 else:
                     print("Operator ? ")
                     if last_was_var is True:
-                        stack.append(rest_stack.pop())
                         rest_stack.append(elem)
-                        rest_stack_list.append(list(rest_stack))
-                        rest_stack.clear()
                         last_was_var = False
+                        continue
                     else:
                         last_two_in_stack = stack[-2:]
                         del stack[-2:]
@@ -145,7 +142,7 @@ class _EquationSolver:
 
         print("end stack = ", stack)
         print("end rest = ", rest_stack)
-        return stack + rest_stack_list
+        return stack + rest_stack
 
     def solve(self, tokens):
         self._tokens = tokens
