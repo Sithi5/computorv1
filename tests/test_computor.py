@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 15:36:51 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/04 16:42:18 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,20 +18,20 @@ from expression_resolver import ExpressionResolver
 def test_expression_parser():
     resolver = ExpressionResolver(verbose=True)
 
-    # Test sign before
-    ret = resolver.solve(expression="+X = 10")
+    # # Test sign before var
+    # ret = resolver.solve(expression="+X = 10")
 
-    # Test sign before
-    ret = resolver.solve(expression="-X = 10")
+    # # Test sign before var
+    # ret = resolver.solve(expression="-X = 10")
 
-    # Test addition with sign before var
-    ret = resolver.solve(expression="X -5 = -X")
+    # # Test addition with sign before var
+    # ret = resolver.solve(expression="X -5 = -X")
+
+    # # lot of sign
+    # ret = resolver.solve(expression="4-+-2 ------+-----++++++2")
 
     # lot of sign
-    ret = resolver.solve(expression="4-+-2 ------+-----++++++ X^0 = 0")
-
-    # lot of sign
-    ret = resolver.solve(expression="4-+-2 ------+-----++++++ X^+-+++-0 = 0")
+    ret = resolver.solve(expression="4-+-2 *+-+++- X= 0")
 
     # Extra zero
     ret = resolver.solve(expression="04578 + 000450")
@@ -45,13 +45,16 @@ def test_expression_parser():
     ret = resolver.solve(expression="04578 + (15000 * 450)^0")
     assert ret == 4579
 
+    # Test replacing sign before numbers
+    ret = resolver.solve(expression="-4 + (+15 * -45)-0")
+
 
 def test_wrong_args():
     resolver = ExpressionResolver(verbose=True)
 
     # Wrong args
     with pytest.raises(SyntaxError) as e:
-        resolver.solve(expression="6&7-2=5")
+        resolver.solve(expression="6&7-2")
     assert str(e.value) == "This is not an expression or some of the operators are not reconized."
 
     # Sign without value after
@@ -78,7 +81,7 @@ def test_wrong_args():
 
     # lot of sign and operator between
     with pytest.raises(SyntaxError) as e:
-        ret = resolver.solve(expression="4X^+-+^++-0 = 0")
+        ret = resolver.solve(expression="4^+-+^++-0 = 0")
     assert (
         str(e.value) == "Operators must be followed by a value or a variable, not another operator."
     )

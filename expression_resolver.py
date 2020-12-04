@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 18:12:15 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/04 16:39:18 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ from globals_vars import (
     _CLOSING_PARENTHESES,
 )
 
-from utils import convert_to_tokens
+from utils import convert_to_tokens, parse_sign, convert_signed_number
 
 
 class ExpressionResolver:
@@ -106,61 +106,6 @@ class ExpressionResolver:
         if parentheses_count != 0:
             raise SyntaxError("Problem with parenthesis.")
 
-    def _parse__sign(self):
-        """
-            Removing extra _sign
-        """
-        while (
-            "--" in self.expression
-            or "++" in self.expression
-            or "-+" in self.expression
-            or "+-" in self.expression
-        ):
-            self.expression = (
-                self.expression.replace("--", "+")
-                .replace("++", "+")
-                .replace("+-", "-")
-                .replace("-+", "-")
-            )
-
-    def _convert_signed_number(self):
-        """
-        This method convert signed number to a sentence readable for npi process.
-        Exemple :
-            5 * -5 is converted to 5 * (0 - 5)
-            10 / +5 is converted to 10 / (0 + 5)
-        """
-        # Checking for first sign
-        if len(self.expression) > 1:
-            if self.expression[0] in _SIGN and (
-                self.expression[1].isdecimal() or self.expression[1] in _OPEN_PARENTHESES
-            ):
-                self.expression = "0" + self.expression
-        for operator in _OPERATORS + _OPEN_PARENTHESES:
-            for sign in _SIGN:
-                split = self.expression.split(operator + sign)
-                if len(split) > 1:
-                    # Starting with 2nd part
-                    index = 1
-                    while index < len(split):
-                        # Getting number
-                        number = ""
-                        i = 0
-                        while i < len(split[index]):
-                            if not split[index][i].isdecimal() and not split[index][i] in _COMMA:
-                                break
-                            number = number + split[index][i]
-                            i += 1
-                        # Replacing signed number by the new sentence
-                        if len(number) > 0:
-                            split[index] = operator + "(0" + sign + number + ")" + split[index][i:]
-                        # If no number, maybe it's a var. Do nothing here.
-                        else:
-                            split[index] = operator + sign + split[index][i:]
-                        index += 1
-
-                self.expression = "".join(split)
-
     def _add_implicit_cross_operator_when_parenthesis(self):
         """
             Checking for numbers before open or after closing parenthesis without sign and add a
@@ -199,7 +144,7 @@ class ExpressionResolver:
         for var in self._vars_set:
             splitted_expression = self.expression.split(var)
             index = 1
-            while index < len(splitted_expression) - 1:
+            while index < len(splitted_expression):
                 # Checking if previous part is not empty
                 if len(splitted_expression[index - 1]) > 0:
                     # Getting previous part to check sign
@@ -208,7 +153,8 @@ class ExpressionResolver:
                         or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
                     ):
                         splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
-                    elif (
+                    # Checking implicit mult after the var
+                    if splitted_expression[index] and (
                         splitted_expression[index][0].isdecimal() is True
                         or splitted_expression[index][0] in _OPEN_PARENTHESES
                     ):
@@ -236,14 +182,14 @@ class ExpressionResolver:
             "Removing all space from the expression : ", self.expression
         ) if self._verbose is True else None
 
-        self._parse__sign()
+        self.expression = parse_sign(self.expression)
         print("Parsing signs : ", self.expression) if self._verbose is True else None
 
         # To put before convert_signed_number because it is creating parenthesis
         self._get_vars()
         print("vars = ", self._vars_set) if self._verbose is True else None
 
-        self._convert_signed_number()
+        self.expression = convert_signed_number(expression=self.expression, accept_var=True)
 
         print("Convert signed numbers : ", self.expression) if self._verbose is True else None
 
@@ -266,9 +212,6 @@ class ExpressionResolver:
             "Removing extra zero and converting numbers to float: ", self.expression
         ) if self._verbose is True else None
 
-    def _check_equation_format(self):
-        pass
-
     def _set_solver(self):
         """
             Setting the right class to solve the expression
@@ -278,9 +221,6 @@ class ExpressionResolver:
         if len(equal_operator) == 0:
             self._solver = _Calculator()
         elif len(equal_operator) == 1:
-            # Equation, assuming the format is correct.
-            self._check_equation_format()
-            print(self.expression)
             self._solver = _EquationSolver(_Calculator())
         else:
             raise NotImplementedError("More than one comparison is not supported for the moment.")

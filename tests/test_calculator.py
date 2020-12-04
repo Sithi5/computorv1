@@ -4,7 +4,7 @@ from expression_resolver import ExpressionResolver
 
 
 def test_calculator():
-    resolver = ExpressionResolver(verbose=True)
+    resolver = ExpressionResolver(verbose=False)
 
     # Simple test
     ret = resolver.solve(expression="5 * 5^0")
@@ -44,26 +44,6 @@ def test_calculator():
     ret = resolver.solve(expression="545875785748.34444444478 * 5.2542 + 10456.81212")
     assert ret == 2868140563935.763
 
-    # Test with wrong parenthesis number
-    with pytest.raises(SyntaxError) as e:
-        ret = resolver.solve(expression="5 * (5 + (10 * 50 + 2)")
-    assert str(e.value) == "Problem with parenthesis."
-
-    # Test with wrong parenthesis number
-    with pytest.raises(SyntaxError) as e:
-        ret = resolver.solve(expression="5 * (5 + (10 * 50 + (2))")
-    assert str(e.value) == "Problem with parenthesis."
-
-    # Test with right parenthesis number but not good open/close order
-    with pytest.raises(SyntaxError) as e:
-        ret = resolver.solve(expression="5 * (5)10 * 50 + )2()(")
-    assert str(e.value) == "Closing parenthesis with no opened one."
-
-    # Test with right parenthesis number but not good open/close order
-    with pytest.raises(SyntaxError) as e:
-        ret = resolver.solve(expression="5 + (5 + 10) + 2)(15*2")
-    assert str(e.value) == "Closing parenthesis with no opened one."
-
     # Implicit multiplication with open parenthesis
     ret = resolver.solve(expression="25(5 + 2)")
     assert ret == 175
@@ -100,8 +80,78 @@ def test_calculator():
     ret = resolver.solve(expression="5 * -10.35843958432134 + 599")
     assert ret == 547.2078020783933
 
-    # Test implicit parenthesis multiply
-    ret = resolver.solve(expression="(5+1)(2-5)")
-
     # Test sign before first number
     ret = resolver.solve(expression="-42-2")
+    assert ret == -44
+
+
+def test_calculator_with_one_var():
+    resolver = ExpressionResolver(verbose=True)
+
+    # # Test calc with var, only one var alone
+    # ret = resolver.solve(expression="thisisavar")
+    # assert ret == "THISISAVAR"
+
+    # # Test calc with var, one var with simple addition
+    # ret = resolver.solve(expression="thisisavar + 5")
+    # assert ret == "5.0+THISISAVAR"
+
+    # # Test calc with var, one var with simple addition
+    # ret = resolver.solve(expression="5 + thisisavar + 5")
+    # assert ret == "10.0+THISISAVAR"
+
+    # # Test calc with var, one var with more complex addition
+    # ret = resolver.solve(expression="5 + thisisavar + 5 (-10 +(+5))")
+    # assert ret == "-20.0+THISISAVAR"
+
+    # # Test calc with var, one var with multiplication
+    # ret = resolver.solve(expression="5 * thisisavar")
+    # assert ret == "5.0*THISISAVAR"
+
+    # # Test calc with var, one var with multiplication
+    # ret = resolver.solve(expression="(5 * 2) * thisisavar")
+    # assert ret == "10.0*THISISAVAR"
+
+    # # Test calc with var, one var with multiplication
+    # ret = resolver.solve(expression="(5 * 2) * thisisavar * 2")
+    # assert ret == "20.0*THISISAVAR"
+
+    # # Test calc with var, one var with multiplication and additions
+    # ret = resolver.solve(expression="+ 2 - 5 + (5 * 2) * thisisavar * 2 - 500")
+    # assert ret == "-503.0+20.0*THISISAVAR"
+
+    # # Test calc with var, implicit mult
+    # ret = resolver.solve(expression="-5 - 2thisisavar2")
+    # assert ret == "-5.0-4.0*THISISAVAR"
+
+    # # Test calc with var, implicit mult
+    # ret = resolver.solve(expression="-5 - 2thisisavar(2(2+5))")
+    # assert ret == "-5.0-28.0*THISISAVAR"
+
+    # Test calc with var, var in simple parenthesis
+    ret = resolver.solve(expression="-5 - (2thisisavar(2(2+5)) * -1)")
+    assert ret == "-28.0*THISISAVAR"
+
+
+def test_calculator_wrong_args():
+    resolver = ExpressionResolver(verbose=False)
+
+    # Test with wrong parenthesis number
+    with pytest.raises(SyntaxError) as e:
+        ret = resolver.solve(expression="5 * (5 + (10 * 50 + 2)")
+    assert str(e.value) == "Problem with parenthesis."
+
+    # Test with wrong parenthesis number
+    with pytest.raises(SyntaxError) as e:
+        ret = resolver.solve(expression="5 * (5 + (10 * 50 + (2))")
+    assert str(e.value) == "Problem with parenthesis."
+
+    # Test with right parenthesis number but not good open/close order
+    with pytest.raises(SyntaxError) as e:
+        ret = resolver.solve(expression="5 * (5)10 * 50 + )2()(")
+    assert str(e.value) == "Closing parenthesis with no opened one."
+
+    # Test with right parenthesis number but not good open/close order
+    with pytest.raises(SyntaxError) as e:
+        ret = resolver.solve(expression="5 + (5 + 10) + 2)(15*2")
+    assert str(e.value) == "Closing parenthesis with no opened one."

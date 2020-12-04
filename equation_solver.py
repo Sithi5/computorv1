@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 19:00:42 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/04 14:58:10 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,8 +21,7 @@ from globals_vars import (
     _CLOSING_PARENTHESES,
 )
 
-from calculator import is_number
-from utils import convert_to_tokens
+from utils import convert_to_tokens, is_number
 
 
 class _EquationSolver:
@@ -223,7 +222,7 @@ class _EquationSolver:
             raise Exception(
                 "Unexpected error when trying to resolve npi. Maybe your input format is not accepted?"
             )
-        return stack[0]
+        return str(c) + "+" + stack[0]
 
     def solve(self, tokens):
         self._tokens = tokens
