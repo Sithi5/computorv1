@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/07 17:28:40 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/07 18:17:25 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -173,6 +173,29 @@ class ExpressionResolver:
         vars_list = re.findall(pattern=r"[A-Z]+", string=self.expression)
         # Removing duplicate var
         self._vars_set = list(set(vars_list))
+
+        # Prevent var in parenthesis
+        index = 0
+        parenthesis_counter = 0
+        is_open = False
+        first_open_index = 0
+        for var in self._vars_set:
+            while index < len(self.expression):
+                if self.expression[index] in _OPEN_PARENTHESES:
+                    if not is_open:
+                        is_open = True
+                        first_open_index = index
+                    parenthesis_counter += 1
+                elif self.expression[index] in _CLOSING_PARENTHESES:
+                    parenthesis_counter -= 1
+                if parenthesis_counter == 0 and is_open:
+                    is_open = False
+                    print("token cutted = ", self.expression[first_open_index : index + 1])
+                    if var in self.expression[first_open_index : index + 1]:
+                        raise NotImplementedError(
+                            "Var cannot be inside a parenthesis for the moment."
+                        )
+                index += 1
 
     def _parse_expression(self):
         print("Expression before parsing : ", self.expression) if self._verbose is True else None

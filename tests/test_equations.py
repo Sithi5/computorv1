@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:30 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/03 18:37:54 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/07 18:20:25 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,8 +27,8 @@ def test_equations_degree_one():
     # Polynomial degree 1 with parenthesis to calc, no solution
     # ret = resolver.solve(expression="52 + 2 * X^0 * 4 -1 + 6 *  2 x  - 5 * 2= (42 * 10) * X^0")
 
-    # Multiplying var
-    ret = resolver.solve(expression="52 + 2 * X^5 * 4X -1 + 6 *  2 * x = 0")
+    # # Multiplying var
+    # ret = resolver.solve(expression="52 + 2 * X^5 * 4X -1 + 6 *  2 * x = 0")
 
     # # Polynomial degree 1 with parenthesis to calc
     # ret = resolver.solve(expression="-42 + (10 + 5)(58*2) + X^0 = (42 * 10) * X^0")

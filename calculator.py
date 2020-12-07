@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/07 17:47:18 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/07 18:47:36 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -95,53 +95,38 @@ class _Calculator:
 
         if not self._check_have_var(first_var):
             sum_power = second_var_power
-            # No number before
-            if len(second_var) == len(self.var_name):
-                return first_var + "*" + self._write_power_to_var(var=second_var, power=sum_power)
-            else:
-                remove_var_name = second_var.replace(self.var_name, "1")
-                tokens = []
-                tokens = convert_to_tokens(first_var + "*" + remove_var_name)
-                return (
-                    str(self.solve(tokens, internal=True))
-                    + "*"
-                    + self._write_power_to_var(var=self.var_name, power=sum_power)
-                )
+            remove_var_name = second_var.replace(self.var_name, "1")
+            tokens = []
+            tokens = convert_to_tokens(first_var + "*" + remove_var_name)
+            return (
+                str(self.solve(tokens, internal=True))
+                + "*"
+                + self._write_power_to_var(var=self.var_name, power=sum_power)
+            )
         elif not self._check_have_var(second_var):
             sum_power = first_var_power
 
-            if len(first_var) == len(self.var_name):
-                return second_var + "*" + self._write_power_to_var(var=first_var, power=sum_power)
-            else:
-                remove_var_name = first_var.replace(self.var_name, "1")
-                tokens = []
-                tokens = convert_to_tokens(remove_var_name + "*" + second_var)
-                return (
-                    str(self.solve(tokens, internal=True))
-                    + "*"
-                    + self._write_power_to_var(var=self.var_name, power=sum_power)
-                )
+            remove_var_name = first_var.replace(self.var_name, "1")
+            tokens = []
+            tokens = convert_to_tokens(remove_var_name + "*" + second_var)
+            return (
+                str(self.solve(tokens, internal=True))
+                + "*"
+                + self._write_power_to_var(var=self.var_name, power=sum_power)
+            )
         # Both have var.
         else:
             sum_power = str(self.solve([first_var_power, "+", second_var_power], internal=True))
+            removed_var1_name = first_var.replace(self.var_name, "1")
+            removed_var2_name = second_var.replace(self.var_name, "1")
+            tokens = []
+            tokens = convert_to_tokens(removed_var1_name + "*" + removed_var2_name)
 
-            # Both vars without multiplyers, only adding the power.
-            if len(first_var) == len(self.var_name) == len(second_var):
-                return self._write_power_to_var(var=first_var, power=sum_power)
-            elif len(first_var) == len(self.var_name):
-                return self._write_power_to_var(var=second_var, power=sum_power)
-            elif len(second_var) == len(self.var_name):
-                return self._write_power_to_var(var=first_var, power=sum_power)
-            else:
-                removed_var1_name = first_var.replace(self.var_name, "1")
-                removed_var2_name = second_var.replace(self.var_name, "1")
-                tokens = []
-                tokens = convert_to_tokens(removed_var1_name + "*" + removed_var2_name)
-                return (
-                    str(self.solve(tokens, internal=True))
-                    + "*"
-                    + self._write_power_to_var(var=self.var_name, power=sum_power)
-                )
+            return (
+                str(self.solve(tokens, internal=True))
+                + "*"
+                + self._write_power_to_var(var=self.var_name, power=sum_power)
+            )
 
     def resolve_npi(self, npi_list) -> str:
         stack = []
@@ -165,15 +150,10 @@ class _Calculator:
                             if elem == "-":
                                 c += float(last_two_in_stack[0])
                                 # Inverting the sign of the var because it is the second element.
-                                result = self._multiply_a_var(
-                                    last_two_in_stack[0], str(last_two_in_stack[1])
-                                )
+                                result = self._multiply_a_var("-1", str(last_two_in_stack[1]))
                             else:
                                 c += float(last_two_in_stack[0])
-                                result = self._multiply_a_var(
-                                    last_two_in_stack[0], str(last_two_in_stack[1])
-                                )
-
+                                result = str(last_two_in_stack[1])
                         elif not self._check_have_var(str(last_two_in_stack[1])):
                             if elem == "-":
                                 c -= float(last_two_in_stack[1])

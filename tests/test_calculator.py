@@ -144,10 +144,6 @@ def test_calculator_with_one_var():
     ret = resolver.solve(expression="-5 - 2thisisavar(2(2+5))")
     assert ret == "-5.0-28.0*THISISAVAR"
 
-    # Test calc with var, var in simple parenthesis
-    ret = resolver.solve(expression="-5 - (2thisisavar(2(2+5)) * -1)")
-    assert ret == "-5.0+28.0*THISISAVAR"
-
     # Test calc with var, addition between var
     ret = resolver.solve(expression="x + x")
     assert ret == "2.0X"
@@ -202,3 +198,8 @@ def test_calculator_wrong_args():
     with pytest.raises(NotImplementedError) as e:
         ret = resolver.solve(expression="5 * x% x")
     assert str(e.value) == "This type of operation with vars is not accepted for the moment."
+
+    # Test calc with var, var in simple parenthesis
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="-5 - (2thisisavar(2(2+5)) * -1)")
+    assert str(e.value) == "Var cannot be inside a parenthesis for the moment."
