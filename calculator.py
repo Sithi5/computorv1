@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/04 16:33:03 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/07 17:46:32 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ class _Calculator:
 
     _tokens = None
     _npi_list = None
-    _var_name = None
+    var_name = None
 
     def stack_last_element(self, elem: list) -> str:
         try:
@@ -37,7 +37,7 @@ class _Calculator:
             return []
 
     def _check_have_var(self, var) -> bool:
-        if self._var_name in var:
+        if self.var_name in var:
             return True
         return False
 
@@ -53,9 +53,36 @@ class _Calculator:
             return float(split[1])
 
     def _write_power_to_var(self, var, power):
-        if int(power) == 1:
+        if float(power) == 1:
             return var
         return var + "^" + str(power)
+
+    def _divide_a_var(self, first_var: str, second_var: str):
+        if not self._check_have_var(first_var):
+            pass
+
+    def _add_or_substract_to_var(self, operator: str, first_var: str, second_var: str):
+        first_var_power = str(self._get_power(first_var))
+        second_var_power = str(self._get_power(second_var))
+
+        # Different power, do nothing here
+        if first_var_power != second_var_power:
+            return first_var + operator + second_var
+
+        # Cutting respective power and convert signed numbers
+        first_var = convert_signed_number(first_var.split("^")[0], accept_var=True)
+        second_var = convert_signed_number(second_var.split("^")[0], accept_var=True)
+
+        removed_var1_name = first_var.replace(self.var_name, "1")
+        removed_var2_name = second_var.replace(self.var_name, "1")
+
+        tokens = []
+        tokens = convert_to_tokens(removed_var1_name + operator + removed_var2_name)
+        result = self.solve(tokens, internal=True)
+        if float(result) == 0:
+            return "0.0"
+        else:
+            return str(result) + self._write_power_to_var(var=self.var_name, power=first_var_power)
 
     def _multiply_a_var(self, first_var: str, second_var: str):
 
@@ -63,71 +90,66 @@ class _Calculator:
         second_var_power = str(self._get_power(second_var))
 
         # Cutting respective power and convert signed numbers
-        first_var = convert_signed_number(first_var.split("^")[0])
-        second_var = convert_signed_number(second_var.split("^")[0])
+        first_var = convert_signed_number(first_var.split("^")[0], accept_var=True)
+        second_var = convert_signed_number(second_var.split("^")[0], accept_var=True)
 
         if not self._check_have_var(first_var):
             sum_power = second_var_power
             # No number before
-            if len(second_var) == len(self._var_name):
+            if len(second_var) == len(self.var_name):
                 return first_var + "*" + self._write_power_to_var(var=second_var, power=sum_power)
             else:
-                remove_var_name = second_var.replace(self._var_name, "1")
+                remove_var_name = second_var.replace(self.var_name, "1")
                 tokens = []
-                tokens.append(first_var)
-                tokens.append("*")
-                tokens = tokens + convert_to_tokens(remove_var_name)
+                tokens = convert_to_tokens(first_var + "*" + remove_var_name)
                 return (
-                    str(self.solve(tokens))
+                    str(self.solve(tokens, internal=True))
                     + "*"
-                    + self._write_power_to_var(var=self._var_name, power=sum_power)
+                    + self._write_power_to_var(var=self.var_name, power=sum_power)
                 )
         elif not self._check_have_var(second_var):
             sum_power = first_var_power
 
-            if len(first_var) == len(self._var_name):
+            if len(first_var) == len(self.var_name):
                 return second_var + "*" + self._write_power_to_var(var=first_var, power=sum_power)
             else:
-                remove_var_name = first_var.replace(self._var_name, "1")
+                remove_var_name = first_var.replace(self.var_name, "1")
                 tokens = []
-                tokens.append(second_var)
-                tokens.append("*")
-                tokens = tokens + convert_to_tokens(remove_var_name)
+                tokens = convert_to_tokens(remove_var_name + "*" + second_var)
                 return (
-                    str(self.solve(tokens))
+                    str(self.solve(tokens, internal=True))
                     + "*"
-                    + self._write_power_to_var(var=self._var_name, power=sum_power)
+                    + self._write_power_to_var(var=self.var_name, power=sum_power)
                 )
         # Both have var.
         else:
-            sum_power = str(self.solve([first_var_power, "+", second_var_power]))
+            sum_power = str(self.solve([first_var_power, "+", second_var_power], internal=True))
 
-            if len(first_var) == len(self._var_name) == len(second_var):
+            # Both vars without multiplyers, only adding the power.
+            if len(first_var) == len(self.var_name) == len(second_var):
                 return self._write_power_to_var(var=first_var, power=sum_power)
-            elif len(first_var) == len(self._var_name):
+            elif len(first_var) == len(self.var_name):
                 return self._write_power_to_var(var=second_var, power=sum_power)
-            elif len(second_var) == len(self._var_name):
+            elif len(second_var) == len(self.var_name):
                 return self._write_power_to_var(var=first_var, power=sum_power)
             else:
-                remove_var1_name = first_var.replace(self._var_name, "1")
-                remove_var2_name = second_var.replace(self._var_name, "1")
+                removed_var1_name = first_var.replace(self.var_name, "1")
+                removed_var2_name = second_var.replace(self.var_name, "1")
                 tokens = []
-                tokens = tokens + convert_to_tokens(remove_var1_name)
-                tokens.append("*")
-                tokens = tokens + convert_to_tokens(remove_var2_name)
+                tokens = convert_to_tokens(removed_var1_name + "*" + removed_var2_name)
                 return (
-                    str(self.solve(tokens))
+                    str(self.solve(tokens, internal=True))
                     + "*"
-                    + self._write_power_to_var(var=self._var_name, power=sum_power)
+                    + self._write_power_to_var(var=self.var_name, power=sum_power)
                 )
 
-    def resolve_npi(self, npi_list):
+    def resolve_npi(self, npi_list) -> str:
         stack = []
         c = 0
-        var_is_present = True if self._var_name else False
+        var_is_present = True if self.var_name else False
 
         for elem in npi_list:
-            if is_number(elem) or (var_is_present and elem in self._var_name):
+            if is_number(elem) or (var_is_present and elem in self.var_name):
                 stack.append(elem)
             else:
                 last_two_in_stack = stack[-2:]
@@ -139,15 +161,14 @@ class _Calculator:
                 ):
                     # - or + operator, adding to c
                     if elem in _SIGN:
-
                         if not self._check_have_var(str(last_two_in_stack[0])):
                             if elem == "-":
                                 c += float(last_two_in_stack[0])
+                                # Inverting the sign of the var because it is the second element.
+                                result = self._multiply_a_var("-1", str(last_two_in_stack[1]))
                             else:
                                 c += float(last_two_in_stack[0])
-                            print("la doing the truc bizarre")
-                            print("var = ", str(last_two_in_stack[1]))
-                            result = self._multiply_a_var("-1", str(last_two_in_stack[1]))
+                                result = str(last_two_in_stack[1])
                         elif not self._check_have_var(str(last_two_in_stack[1])):
                             if elem == "-":
                                 c -= float(last_two_in_stack[1])
@@ -155,14 +176,25 @@ class _Calculator:
                                 c += float(last_two_in_stack[1])
                             result = str(last_two_in_stack[0])
                         else:
-                            result = str(last_two_in_stack[0]) + elem + str(last_two_in_stack[1])
+                            # Adding var to var
+                            result = self._add_or_substract_to_var(
+                                operator=elem,
+                                first_var=str(last_two_in_stack[0]),
+                                second_var=str(last_two_in_stack[1]),
+                            )
                     # mult of var
                     elif elem == "*":
                         result = self._multiply_a_var(
                             str(last_two_in_stack[0]), str(last_two_in_stack[1])
                         )
+                    elif elem == "/":
+                        result = self._divide_a_var(
+                            str(last_two_in_stack[0]), str(last_two_in_stack[1])
+                        )
                     else:
-                        result = str(last_two_in_stack[0]) + elem + str(last_two_in_stack[1])
+                        raise NotImplementedError(
+                            "This type of operation with vars is not accepted for the moment."
+                        )
 
                 # Doing usual calc
                 elif elem == "^":
@@ -178,8 +210,6 @@ class _Calculator:
                 elif elem == "-":
                     result = float(last_two_in_stack[0]) - float(last_two_in_stack[1])
                 stack.append(result)
-            print("stack at end = ", stack)
-            print()
 
         if len(stack) > 1:
             raise Exception(
@@ -229,29 +259,29 @@ class _Calculator:
         return res + stack[::-1]
 
     def _check_vars(self):
-        nb_of_var = 0
-        for token in self._tokens:
-            if (
-                not token in _OPEN_PARENTHESES + _CLOSING_PARENTHESES + _OPERATORS + _SIGN
-                and not is_number(token)
-            ):
-                if token.isalpha():
-                    nb_of_var += 1
-                    if nb_of_var > 1:
-                        raise NotImplementedError(
-                            "Calculator does not support more than one variables."
-                        )
-                    else:
-                        self._var_name = token
-                else:
-                    raise SyntaxError(f"An error occured with the following syntax : {token}")
+        """
+        Actually checking there is one and only one var and getting the name of it.
+        Also checking notImplemented operations.
+        """
+        vars_list = re.findall(pattern=r"[A-Z]+", string="".join(self._tokens))
+        # Removing duplicate var
+        vars_set = list(set(vars_list))
+        if len(vars_set) > 1:
+            raise SyntaxError("Calculator does not accept more than 1 var.")
+        self.var_name = "".join(vars_set)
 
-    def solve(self, tokens: list) -> int:
+    def solve(self, tokens: list, verbose: bool = False, internal: bool = False) -> str:
+        """
+        Resolving str calc.
+        If internal is set to true, it means that the calc is from inside the class and should check
+        For vars because it should be already set.
+        """
         self._tokens = tokens
-        self._check_vars()
-        print("token in calc = ", tokens)
-        npi = self.npi_converter(self._tokens, accept_var=True if self._var_name else False)
-        print("npi in calc = ", npi)
+        self._verbose = verbose
+        print("Token inside Calculator : ", tokens) if self._verbose is True else None
+        if not internal:
+            self._check_vars()
+        npi = self.npi_converter(self._tokens, accept_var=True if self.var_name else False)
+        print("Token converted to npi system : ", npi) if self._verbose is True else None
         result = self.resolve_npi(npi)
-        print("result of calc = ", result)
         return result

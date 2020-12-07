@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/04 16:39:18 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/07 17:28:40 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -112,32 +112,34 @@ class ExpressionResolver:
             multiplicator operator.
         """
         # Checking open parenthesis
-        splitted_expression = self.expression.split("(")
-        index = 1
-        while index < len(splitted_expression):
-            # Checking if previous part is not empty
-            if len(splitted_expression[index - 1]) > 0:
-                # Getting previous part to check sign
-                if (
-                    splitted_expression[index - 1][-1].isdecimal() is True
-                    or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
-                ):
-                    splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
-            index += 1
-        self.expression = "(".join(splitted_expression)
+        for open_parenthese in _OPEN_PARENTHESES:
+            splitted_expression = self.expression.split(open_parenthese)
+            index = 1
+            while index < len(splitted_expression):
+                # Checking if previous part is not empty
+                if len(splitted_expression[index - 1]) > 0:
+                    # Getting previous part to check sign
+                    if (
+                        splitted_expression[index - 1][-1].isdecimal() is True
+                        or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
+                    ):
+                        splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
+                index += 1
+            self.expression = open_parenthese.join(splitted_expression)
 
         # Checking closing parenthesis
-        splitted_expression = self.expression.split(")")
-        index = 0
-        while index < len(splitted_expression) - 1:
-            # Getting previous part to check sign
-            if (
-                splitted_expression[index + 1]
-                and splitted_expression[index + 1][0].isdecimal() is True
-            ):
-                splitted_expression[index + 1] = "*" + splitted_expression[index + 1]
-            index += 1
-        self.expression = ")".join(splitted_expression)
+        for closing_parenthese in _CLOSING_PARENTHESES:
+            splitted_expression = self.expression.split(closing_parenthese)
+            index = 0
+            while index < len(splitted_expression) - 1:
+                # Getting previous part to check sign
+                if (
+                    splitted_expression[index + 1]
+                    and splitted_expression[index + 1][0].isdecimal() is True
+                ):
+                    splitted_expression[index + 1] = "*" + splitted_expression[index + 1]
+                index += 1
+            self.expression = closing_parenthese.join(splitted_expression)
 
     def _add_implicit_cross_operator_for_vars(self):
         # Splitting from vars
@@ -153,12 +155,12 @@ class ExpressionResolver:
                         or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
                     ):
                         splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
-                    # Checking implicit mult after the var
-                    if splitted_expression[index] and (
-                        splitted_expression[index][0].isdecimal() is True
-                        or splitted_expression[index][0] in _OPEN_PARENTHESES
-                    ):
-                        splitted_expression[index] = "*" + splitted_expression[index]
+                # Checking implicit mult after the var
+                if splitted_expression[index] and (
+                    splitted_expression[index][0].isdecimal() is True
+                    or splitted_expression[index][0] in _OPEN_PARENTHESES
+                ):
+                    splitted_expression[index] = "*" + splitted_expression[index]
                 index += 1
             self.expression = var.join(splitted_expression)
 
@@ -232,4 +234,4 @@ class ExpressionResolver:
         self.expression = expression.upper()
         self._parse_expression()
         self._set_solver()
-        return self._solver.solve(self.expression)
+        return self._solver.solve(self.expression, verbose=self._verbose)

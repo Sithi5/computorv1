@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/04 16:42:18 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/07 16:46:44 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,20 +18,26 @@ from expression_resolver import ExpressionResolver
 def test_expression_parser():
     resolver = ExpressionResolver(verbose=True)
 
-    # # Test sign before var
-    # ret = resolver.solve(expression="+X = 10")
+    # Test sign before var
+    ret = resolver.solve(expression="+X = 10")
 
-    # # Test sign before var
-    # ret = resolver.solve(expression="-X = 10")
+    # Test sign before var
+    ret = resolver.solve(expression="-X = 10")
 
-    # # Test addition with sign before var
-    # ret = resolver.solve(expression="X -5 = -X")
+    # Test sign before var
+    ret = resolver.solve(expression="-X")
 
-    # # lot of sign
-    # ret = resolver.solve(expression="4-+-2 ------+-----++++++2")
+    # Test sign before var
+    ret = resolver.solve(expression="   +X")
+
+    # Test addition with sign before var
+    ret = resolver.solve(expression="X -5 = -X")
 
     # lot of sign
-    ret = resolver.solve(expression="4-+-2 *+-+++- X= 0")
+    ret = resolver.solve(expression="4-+-2 ------+-----++++++2")
+
+    # lot of sign
+    ret = resolver.solve(expression="4-+-2 *+-+++- 0")
 
     # Extra zero
     ret = resolver.solve(expression="04578 + 000450")
@@ -69,11 +75,6 @@ def test_wrong_args():
         str(e.value) == "Operators must be followed by a value or a variable, not another operator."
     )
 
-    # Tests var in calculator
-    with pytest.raises(NotImplementedError) as e:
-        resolver.solve(expression="X+18+ 5")
-    assert str(e.value) == "Calculator does not support variables."
-
     # More than one = in the expression
     with pytest.raises(NotImplementedError) as e:
         resolver.solve(expression="42 * X = 42 * Y = 42 * Z")
@@ -89,7 +90,7 @@ def test_wrong_args():
     # multiple comma in one number
     with pytest.raises(SyntaxError) as e:
         ret = resolver.solve(expression="450.25.45 + 12")
-    assert str(e.value) == "An error occured with the following syntax : 450.25.45"
+    assert str(e.value) == "Some numbers are not well formated : 450.25.45"
 
     # wrong use of comma
     with pytest.raises(SyntaxError) as e:
@@ -121,8 +122,3 @@ def test_wrong_args():
     assert (
         str(e.value) == "Operators must be followed by a value or a variable, not another operator."
     )
-
-    # Test var with parenthesis
-    with pytest.raises(NotImplementedError) as e:
-        ret = resolver.solve(expression="5 * x(5 + 10)")
-    assert str(e.value) == "Calculator does not support variables."

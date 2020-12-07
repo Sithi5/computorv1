@@ -52,6 +52,18 @@ def test_calculator():
     ret = resolver.solve(expression="(5 + 2)25")
     assert ret == 175
 
+    # Test different parenthesis
+    ret = resolver.solve(expression="(5 + 2]25")
+    assert ret == 175
+
+    # Test different parenthesis
+    ret = resolver.solve(expression="[5 + 2]25")
+    assert ret == 175
+
+    # Test different parenthesis
+    ret = resolver.solve(expression="[5 + 2}25")
+    assert ret == 175
+
     # Test multiplying by a signed number
     ret = resolver.solve(expression="5 * -10 + 599")
     assert ret == 549
@@ -84,53 +96,73 @@ def test_calculator():
     ret = resolver.solve(expression="-42-2")
     assert ret == -44
 
+    # Test one var with parenthesis in calculator
+    ret = resolver.solve(expression="5 * x(5 + 10)")
+    assert ret == "75.0*X"
+
 
 def test_calculator_with_one_var():
     resolver = ExpressionResolver(verbose=True)
 
-    # # Test calc with var, only one var alone
-    # ret = resolver.solve(expression="thisisavar")
-    # assert ret == "THISISAVAR"
+    # Test calc with var, only one var alone
+    ret = resolver.solve(expression="thisisavar")
+    assert ret == "THISISAVAR"
 
-    # # Test calc with var, one var with simple addition
-    # ret = resolver.solve(expression="thisisavar + 5")
-    # assert ret == "5.0+THISISAVAR"
+    # Test calc with var, one var with simple addition
+    ret = resolver.solve(expression="thisisavar + 5")
+    assert ret == "5.0+THISISAVAR"
 
-    # # Test calc with var, one var with simple addition
-    # ret = resolver.solve(expression="5 + thisisavar + 5")
-    # assert ret == "10.0+THISISAVAR"
+    # Test calc with var, one var with simple addition
+    ret = resolver.solve(expression="5 + thisisavar + 5")
+    assert ret == "10.0+THISISAVAR"
 
-    # # Test calc with var, one var with more complex addition
-    # ret = resolver.solve(expression="5 + thisisavar + 5 (-10 +(+5))")
-    # assert ret == "-20.0+THISISAVAR"
+    # Test calc with var, one var with more complex addition
+    ret = resolver.solve(expression="5 + thisisavar + 5 (-10 +(+5))")
+    assert ret == "-20.0+THISISAVAR"
 
-    # # Test calc with var, one var with multiplication
-    # ret = resolver.solve(expression="5 * thisisavar")
-    # assert ret == "5.0*THISISAVAR"
+    # Test calc with var, one var with multiplication
+    ret = resolver.solve(expression="5 * thisisavar")
+    assert ret == "5.0*THISISAVAR"
 
-    # # Test calc with var, one var with multiplication
-    # ret = resolver.solve(expression="(5 * 2) * thisisavar")
-    # assert ret == "10.0*THISISAVAR"
+    # Test calc with var, one var with multiplication
+    ret = resolver.solve(expression="(5 * 2) * thisisavar")
+    assert ret == "10.0*THISISAVAR"
 
-    # # Test calc with var, one var with multiplication
-    # ret = resolver.solve(expression="(5 * 2) * thisisavar * 2")
-    # assert ret == "20.0*THISISAVAR"
+    # Test calc with var, one var with multiplication
+    ret = resolver.solve(expression="(5 * 2) * thisisavar * 2")
+    assert ret == "20.0*THISISAVAR"
 
-    # # Test calc with var, one var with multiplication and additions
-    # ret = resolver.solve(expression="+ 2 - 5 + (5 * 2) * thisisavar * 2 - 500")
-    # assert ret == "-503.0+20.0*THISISAVAR"
+    # Test calc with var, one var with multiplication and additions
+    ret = resolver.solve(expression="+ 2 - 5 + (5 * 2) * thisisavar * 2 - 500")
+    assert ret == "-503.0+20.0*THISISAVAR"
 
-    # # Test calc with var, implicit mult
-    # ret = resolver.solve(expression="-5 - 2thisisavar2")
-    # assert ret == "-5.0-4.0*THISISAVAR"
+    # Test calc with var, implicit mult
+    ret = resolver.solve(expression="-5 - 2thisisavar2")
+    assert ret == "-5.0-4.0*THISISAVAR"
 
-    # # Test calc with var, implicit mult
-    # ret = resolver.solve(expression="-5 - 2thisisavar(2(2+5))")
-    # assert ret == "-5.0-28.0*THISISAVAR"
+    # Test calc with var, implicit mult
+    ret = resolver.solve(expression="-5 - 2thisisavar(2(2+5))")
+    assert ret == "-5.0-28.0*THISISAVAR"
 
     # Test calc with var, var in simple parenthesis
     ret = resolver.solve(expression="-5 - (2thisisavar(2(2+5)) * -1)")
-    assert ret == "-28.0*THISISAVAR"
+    assert ret == "-5.0+28.0*THISISAVAR"
+
+    # Test calc with var, addition between var
+    ret = resolver.solve(expression="x + x")
+    assert ret == "2.0X"
+
+    # Test calc with var, addition between var
+    ret = resolver.solve(expression="-5 - x + x * -1")
+    assert ret == "-5.0-2.0X"
+
+    # Test calc with var, sub between var
+    ret = resolver.solve(expression="x - x")
+    assert ret == "0.0"
+
+    # Test calc with var, sub between var
+    ret = resolver.solve(expression="54x - x(-2)")
+    assert ret == "56.0X"
 
 
 def test_calculator_wrong_args():
@@ -155,3 +187,18 @@ def test_calculator_wrong_args():
     with pytest.raises(SyntaxError) as e:
         ret = resolver.solve(expression="5 + (5 + 10) + 2)(15*2")
     assert str(e.value) == "Closing parenthesis with no opened one."
+
+    # Test two var in calculator
+    with pytest.raises(SyntaxError) as e:
+        ret = resolver.solve(expression="5 * x(5 + 10) * y")
+    assert str(e.value) == "Calculator does not accept more than 1 var."
+
+    # Test wrong operation for vars
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="5 * x% 2")
+    assert str(e.value) == "This type of operation with vars is not accepted for the moment."
+
+    # Test wrong operation for vars
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="5 * x% x")
+    assert str(e.value) == "This type of operation with vars is not accepted for the moment."
