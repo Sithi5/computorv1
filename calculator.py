@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/07 17:46:32 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/07 17:47:18 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -165,10 +165,15 @@ class _Calculator:
                             if elem == "-":
                                 c += float(last_two_in_stack[0])
                                 # Inverting the sign of the var because it is the second element.
-                                result = self._multiply_a_var("-1", str(last_two_in_stack[1]))
+                                result = self._multiply_a_var(
+                                    last_two_in_stack[0], str(last_two_in_stack[1])
+                                )
                             else:
                                 c += float(last_two_in_stack[0])
-                                result = str(last_two_in_stack[1])
+                                result = self._multiply_a_var(
+                                    last_two_in_stack[0], str(last_two_in_stack[1])
+                                )
+
                         elif not self._check_have_var(str(last_two_in_stack[1])):
                             if elem == "-":
                                 c -= float(last_two_in_stack[1])
