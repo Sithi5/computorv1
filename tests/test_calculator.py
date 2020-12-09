@@ -102,7 +102,7 @@ def test_calculator():
 
 
 def test_calculator_with_one_var():
-    resolver = ExpressionResolver(verbose=True)
+    resolver = ExpressionResolver(verbose=False)
 
     # Test calc with var, only one var alone
     ret = resolver.solve(expression="thisisavar")
@@ -148,6 +148,18 @@ def test_calculator_with_one_var():
     ret = resolver.solve(expression="x + x")
     assert ret == "2.0X"
 
+    # Test calc with var
+    ret = resolver.solve(expression="1 * x")
+    assert ret == "X"
+
+    # Test calc with var
+    ret = resolver.solve(expression="5 * x")
+    assert ret == "5.0*X"
+
+    # Test calc with var
+    ret = resolver.solve(expression="-1 * x")
+    assert ret == "-X"
+
     # Test calc with var, addition between var
     ret = resolver.solve(expression="-5 - x + x * -1")
     assert ret == "-5.0-2.0X"
@@ -159,6 +171,50 @@ def test_calculator_with_one_var():
     # Test calc with var, sub between var
     ret = resolver.solve(expression="54x - x(-2)")
     assert ret == "56.0X"
+
+    # Test calc with var, multiplication between var
+    ret = resolver.solve(expression="x * x")
+    assert ret == "X^2.0"
+
+    # Test calc with var, multiplication between var
+    ret = resolver.solve(expression="x * 5x")
+    assert ret == "5.0*X^2.0"
+
+    # Test calc with var, multiplication between var
+    ret = resolver.solve(expression="x * x * x + (5 * 2)")
+    assert ret == "10.0+X^3.0"
+
+    # Test calc with var, dividing var
+    ret = resolver.solve(expression="x / 50 * x + (5 * 2)")
+    assert ret == "10.0+0.02*X^2.0"
+
+    # Test calc with var, dividing var by another var
+    ret = resolver.solve(expression="x / 5 / x + (5 * 2)")
+    assert ret == "10.2"
+
+    # Test calc with var, dividing var by another var
+    ret = resolver.solve(expression="2x / 5 / x + (5 * 2)")
+    assert ret == "10.4"
+
+    # Test calc with var, dividing var by another var
+    ret = resolver.solve(expression="2x^5 / 5 / x   + (5 * 2)")
+    assert ret == "10.0+0.4*X^4.0"
+
+    # Test calc with var, dividing var by another var
+    ret = resolver.solve(expression="2x^5 / 5 / x *x   + (5 * 2)")
+    assert ret == "10.0+0.4*X^5.0"
+
+    # Test calc with var, dividing var by another var
+    ret = resolver.solve(expression="50x/x")
+    assert ret == "50.0"
+
+    # Test calc with var, power var
+    ret = resolver.solve(expression="50x^2")
+    assert ret == "50.0*X^2.0"
+
+    # Test calc with var, power var
+    ret = resolver.solve(expression="50x^(2+5)")
+    assert ret == "50.0*X^7.0"
 
 
 def test_calculator_wrong_args():
@@ -203,3 +259,18 @@ def test_calculator_wrong_args():
     with pytest.raises(NotImplementedError) as e:
         ret = resolver.solve(expression="-5 - (2thisisavar(2(2+5)) * -1)")
     assert str(e.value) == "Var cannot be inside a parenthesis for the moment."
+
+    # Test calc with var, dividing number by a var
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="50 / x * x + (5 * 2)")
+    assert str(e.value) == "Cannot divide a number by a var for the moment."
+
+    # Test calc with var, power var by var
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="50x^X")
+    assert str(e.value) == "Cannot power a var by a var for the moment."
+
+    # Test calc with var, power number by var
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="50^X")
+    assert str(e.value) == "Cannot power a number by a var for the moment."

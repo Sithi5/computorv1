@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/07 16:46:44 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/09 16:15:34 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ from expression_resolver import ExpressionResolver
 
 
 def test_expression_parser():
-    resolver = ExpressionResolver(verbose=True)
+    resolver = ExpressionResolver(verbose=False)
 
     # Test sign before var
     ret = resolver.solve(expression="+X = 10")
@@ -31,7 +31,7 @@ def test_expression_parser():
     ret = resolver.solve(expression="   +X")
 
     # Test addition with sign before var
-    ret = resolver.solve(expression="X -5 = -X")
+    ret = resolver.solve(expression="+X  = -x")
 
     # lot of sign
     ret = resolver.solve(expression="4-+-2 ------+-----++++++2")
@@ -56,7 +56,7 @@ def test_expression_parser():
 
 
 def test_wrong_args():
-    resolver = ExpressionResolver(verbose=True)
+    resolver = ExpressionResolver(verbose=False)
 
     # Wrong args
     with pytest.raises(SyntaxError) as e:

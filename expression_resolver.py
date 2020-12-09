@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/07 18:17:25 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/09 12:45:54 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -190,7 +190,6 @@ class ExpressionResolver:
                     parenthesis_counter -= 1
                 if parenthesis_counter == 0 and is_open:
                     is_open = False
-                    print("token cutted = ", self.expression[first_open_index : index + 1])
                     if var in self.expression[first_open_index : index + 1]:
                         raise NotImplementedError(
                             "Var cannot be inside a parenthesis for the moment."

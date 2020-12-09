@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:45 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/02 15:08:01 by mabouce          ###   ########.fr        #
+#    Updated: 2020/12/09 14:27:30 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,6 @@ def main(argv=None):
 
     resolver = ExpressionResolver(verbose=args.verbose)
     try:
-        print("args.expression", args.expression)
         result = resolver.solve(args.expression)
         print("result = ", result)
     except SyntaxError as e:
