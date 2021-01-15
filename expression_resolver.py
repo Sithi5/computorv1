@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/09 12:45:54 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/15 11:17:11 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ from globals_vars import (
     _OPEN_PARENTHESES,
     _CLOSING_PARENTHESES,
 )
+from exception import NothingToDoError
 
 from utils import convert_to_tokens, parse_sign, convert_signed_number
 
@@ -205,6 +206,16 @@ class ExpressionResolver:
         print(
             "Removing all space from the expression : ", self.expression
         ) if self._verbose is True else None
+
+        # Checking if there is any sign or operator in the expression
+        ok = False
+        for operator in _OPERATORS + _SIGN:
+            if operator in self.expression:
+                ok = True
+        if ok is False:
+            raise NothingToDoError(
+                "There is no operators or sign in the expression. Nothing to do here."
+            )
 
         self.expression = parse_sign(self.expression)
         print("Parsing signs : ", self.expression) if self._verbose is True else None

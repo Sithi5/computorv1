@@ -87,8 +87,11 @@ def test_my_round():
 
     # Big round
     assert my_round(99999999999999999999999999999999999999, 20) == 1e38
+    assert my_round(1e10, 5) == 10000000000.0
 
     # small round
     assert my_round(1e-100000, 20) == 0
 
-    pass
+    # Negative round
+    assert my_round(-1.045754345454242, 6) == -1.045754
+    assert my_round(-0.47513146390886934, 6) == -0.475131

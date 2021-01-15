@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/11 16:43:06 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/15 11:50:24 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -158,9 +158,6 @@ class _EquationSolver:
         self._polynom_degree = polynom_max_degree
 
     def _get_discriminant(self, a: float, b: float, c: float) -> float:
-        assert isinstance(a, float)
-        assert isinstance(b, float)
-        assert isinstance(c, float)
         return my_power(b, 2.0) - 4.0 * a * c
 
     def _solve_polynom_degree_two(self):
@@ -185,14 +182,25 @@ class _EquationSolver:
             self.solution = []
             solution_one = (-b + my_sqrt(discriminant)) / (2 * a)
             solution_two = (-b - my_sqrt(discriminant)) / (2 * a)
-            print("solution_one = ", solution_one)
-            print("solution_one = ", my_round(solution_one, 6))
             self.solution.append(my_round(solution_one, 6))
             self.solution.append(my_round(solution_two, 6))
         elif discriminant == 0:
             self.solution = (-b) / (2 * a)
         else:
             self.solution = "No solution in real number."
+
+    def _solve_polynom_degree_one(self):
+        try:
+            b = get_var_multiplier(self._polynom_dict_left["b"], var_name=self.var_name)
+        except:
+            b = 0.0
+        try:
+            c = float(self._polynom_dict_left["c"])
+        except:
+            c = 0.0
+
+        print(" b = ", b, " c = ", c) if self._verbose is True else None
+        self.solution = c / b
 
     def solve(self, tokens: list, verbose: bool = False):
         self._verbose = verbose
@@ -230,6 +238,6 @@ class _EquationSolver:
         elif self._polynom_degree == 2:
             self._solve_polynom_degree_two()
         else:
-            raise NotImplementedError(f"Not implemented yet.")
+            self._solve_polynom_degree_one()
 
         return self.solution

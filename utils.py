@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/03 18:10:41 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/11 16:40:48 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/15 11:40:15 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -156,11 +156,8 @@ def my_round(number: float, precision: int = 2) -> float:
     """
     Round the number after 'precision' digits after the comma.
     """
-    infinity_float = float("infinity")
-    negative_infinity_float = float("-infinity")
-    precision = int(precision)
 
-    if number == negative_infinity_float or number == infinity_float:
+    if number == float("-infinity") or number == float("infinity"):
         raise ValueError("Couln't round infinity.")
 
     # Checking for Nan
@@ -171,26 +168,8 @@ def my_round(number: float, precision: int = 2) -> float:
 
     if precision > 20 or precision < 0:
         raise ValueError("Precision should be between 0 and 20")
-    save_precision = precision
-    result = str(int(number)) + "."
-    while precision > 0:
-        if str(number)[1:][0] == "e":
-            number = number * 10
-        else:
-            number = float(str(number)[1:]) * 10
-        try:
-            int_number = int(number)
-        except Exception:
-            raise ValueError("Number is too big to be round.")
-        result = result + str(int_number)[-1]
-        precision -= 1
-    number = float(str(number)[1:]) * 10
-    int_number = int(number)
-    result = float(result)
-    if int(str(int_number)[-1]) >= 5:
-        result = result + 1 * my_power(10, -save_precision)
 
-    return float(result)
+    return float(format(number, f".{precision}f"))
 
 
 def my_abs(number: float) -> float:

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/09 19:23:27 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/15 12:26:20 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,14 @@ from globals_vars import (
     _CLOSING_PARENTHESES,
 )
 
-from utils import convert_to_tokens, is_number, parse_sign, convert_signed_number, my_power
+from utils import (
+    convert_to_tokens,
+    is_number,
+    parse_sign,
+    convert_signed_number,
+    my_power,
+    my_round,
+)
 
 
 class _Calculator:
@@ -212,10 +219,11 @@ class _Calculator:
 
     def resolve_npi(self, npi_list) -> str:
         stack = []
-        c = 0
+        c = 0.0
         var_is_present = True if self.var_name else False
 
         for elem in npi_list:
+            print("elem = ", elem)
             if is_number(elem) or (var_is_present and elem in self.var_name):
                 stack.append(elem)
             else:
@@ -232,19 +240,22 @@ class _Calculator:
                 ):
                     # - or + operator, adding to c
                     if elem in _SIGN:
+                        print("c = ", c)
+
                         if not self._check_have_var(str(last_two_in_stack[0])):
                             if elem == "-":
-                                c += float(last_two_in_stack[0])
+                                c = my_round(c - float(last_two_in_stack[0]))
                                 # Inverting the sign of the var because it is the second element.
                                 result = self._multiply_a_var("-1", str(last_two_in_stack[1]))
                             else:
-                                c += float(last_two_in_stack[0])
+                                c = my_round(c + float(last_two_in_stack[0]))
                                 result = str(last_two_in_stack[1])
+
                         elif not self._check_have_var(str(last_two_in_stack[1])):
                             if elem == "-":
-                                c -= float(last_two_in_stack[1])
+                                c = my_round(c - float(last_two_in_stack[1]))
                             else:
-                                c += float(last_two_in_stack[1])
+                                c = my_round(c + float(last_two_in_stack[1]))
                             result = str(last_two_in_stack[0])
                         else:
                             # Adding var to var
@@ -273,23 +284,27 @@ class _Calculator:
 
                 # Doing usual calc
                 elif elem == "^":
-                    result = my_power(float(last_two_in_stack[0]), float(last_two_in_stack[1]))
+                    result = my_round(
+                        my_power(float(last_two_in_stack[0]), float(last_two_in_stack[1]))
+                    )
                 elif elem == "*":
-                    result = float(last_two_in_stack[0]) * float(last_two_in_stack[1])
+                    result = my_round(float(last_two_in_stack[0]) * float(last_two_in_stack[1]))
                 elif elem == "/":
-                    result = float(last_two_in_stack[0]) / float(last_two_in_stack[1])
+                    result = my_round(float(last_two_in_stack[0]) / float(last_two_in_stack[1]))
                 elif elem == "%":
-                    result = float(last_two_in_stack[0]) % float(last_two_in_stack[1])
+                    result = my_round(float(last_two_in_stack[0]) % float(last_two_in_stack[1]))
                 elif elem == "+":
-                    result = float(last_two_in_stack[0]) + float(last_two_in_stack[1])
+                    result = my_round(float(last_two_in_stack[0]) + float(last_two_in_stack[1]))
+                    print("laaa ", result)
                 elif elem == "-":
-                    result = float(last_two_in_stack[0]) - float(last_two_in_stack[1])
+                    result = my_round(float(last_two_in_stack[0]) - float(last_two_in_stack[1]), 6)
                 stack.append(result)
 
         if len(stack) > 1:
             raise Exception(
                 "Unexpected error when trying to resolve npi. Maybe your input format is not accepted?"
             )
+
         if var_is_present:
             if c != 0:
                 # Parse sign because could have duplicate sign with the add of the +
