@@ -2,6 +2,7 @@ import pytest
 
 from expression_resolver import ExpressionResolver
 from exception import NothingToDoError
+from utils import my_round
 
 
 def test_calculator():
@@ -43,7 +44,7 @@ def test_calculator():
 
     # Hard test with float
     ret = resolver.solve(expression="545875785748.34444444478 * 5.2542 + 10456.81212")
-    assert ret == 2868140563935.763
+    assert my_round(ret, 2) == my_round(2868140563935.763, 2)
 
     # Implicit multiplication with open parenthesis
     ret = resolver.solve(expression="25(5 + 2)")
@@ -91,7 +92,7 @@ def test_calculator():
 
     # Test multiplying by a signed float
     ret = resolver.solve(expression="5 * -10.35843958432134 + 599")
-    assert ret == 547.2078020783933
+    assert my_round(ret, 2) == my_round(547.2078020783933, 2)
 
     # Test sign before first number
     ret = resolver.solve(expression="-42-2")

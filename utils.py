@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/03 18:10:41 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 11:40:15 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/15 12:49:43 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -68,9 +68,14 @@ def convert_signed_number(expression: str, accept_var: bool = False):
         ):
             i = 1
             number = ""
-            while i < len(expression) and (is_number(expression[i]) or expression[i] in _COMMA):
-                number = number + expression[i]
-                i += 1
+            if expression[i] in _OPEN_PARENTHESES:
+                while i < len(expression) and (expression[i] not in _CLOSING_PARENTHESES):
+                    number = number + expression[i]
+                    i += 1
+            else:
+                while i < len(expression) and (is_number(expression[i]) or expression[i] in _COMMA):
+                    number = number + expression[i]
+                    i += 1
             if len(number) > 0:
                 expression = "(0" + expression[0] + number + ")" + expression[i:]
             elif accept_var:

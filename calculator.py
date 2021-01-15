@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 12:26:20 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/15 12:29:06 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -223,7 +223,6 @@ class _Calculator:
         var_is_present = True if self.var_name else False
 
         for elem in npi_list:
-            print("elem = ", elem)
             if is_number(elem) or (var_is_present and elem in self.var_name):
                 stack.append(elem)
             else:
@@ -240,11 +239,9 @@ class _Calculator:
                 ):
                     # - or + operator, adding to c
                     if elem in _SIGN:
-                        print("c = ", c)
-
                         if not self._check_have_var(str(last_two_in_stack[0])):
                             if elem == "-":
-                                c = my_round(c - float(last_two_in_stack[0]))
+                                c = my_round(c + float(last_two_in_stack[0]))
                                 # Inverting the sign of the var because it is the second element.
                                 result = self._multiply_a_var("-1", str(last_two_in_stack[1]))
                             else:
