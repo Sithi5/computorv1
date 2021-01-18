@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:30 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 17:51:39 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 19:29:10 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -54,6 +54,9 @@ def test_equation_degree_one():
     ret = resolver.solve(expression="X^0 = X^0")
     assert ret == "X can be any real number."
 
+    ret = resolver.solve(expression="-0x^2 - -X^1  -0X^0    =0")
+    assert ret == "0.0"
+
 
 def test_equation_degree_two():
     resolver = ExpressionResolver(verbose=False)
@@ -84,6 +87,37 @@ def test_equation_degree_two():
 
     ret = resolver.solve(expression="x^2 -4x + 4 -1= 0")
     assert ret == ["3.0", "1.0"]
+
+    # 0 coeff
+    ret = resolver.solve(expression="0x^2    =0")
+    assert ret == "X can be any real number."
+
+    ret = resolver.solve(expression="0x^2 * X^1 10X^0    =0")
+    assert ret == "X can be any real number."
+
+    ret = resolver.solve(expression="0x^2 * X^1  + 10X^0    =0")
+    assert ret == "There is no solution for this equation."
+
+    ret = resolver.solve(expression="0x^2 + X^1  + 10X^0    =0")
+    assert ret == "-10.0"
+
+    ret = resolver.solve(expression="-0x^2 + X^1  + 10X^0    =0")
+    assert ret == "-10.0"
+
+    ret = resolver.solve(expression="-0x^2 - X^1  + 10X^0    =0")
+    assert ret == "10.0"
+
+    ret = resolver.solve(expression="-x^2 - 0X^1  + 10X^0    =0")
+    assert ret == ["-3.162278", "3.162278"]
+
+    ret = resolver.solve(expression="-x^2 - -0X^1  + 10X^0    =0")
+    assert ret == ["-3.162278", "3.162278"]
+
+    ret = resolver.solve(expression="-x^2 - -0X^1  -0X^0    =0")
+    assert ret == "0.0"
+
+    ret = resolver.solve(expression="-0x^2 - -0X^1  -0X^0    =0")
+    assert ret == "X can be any real number."
 
 
 def test_equations_infinite_solution():
@@ -123,7 +157,7 @@ def test_wrong_equation():
         ret = resolver.solve(expression="2 = -2X^(-5)")
     assert str(e.value) == "Some part of the polynomial var have negative power."
 
-    # power var with irational value
+    # power var with irrational value
     with pytest.raises(NotImplementedError) as e:
         ret = resolver.solve(expression="2 = -2X^5.00000005")
     assert str(e.value) == "irrational numbers are not accepted as exponent."
@@ -144,3 +178,8 @@ def test_wrong_equation():
         str(e.value)
         == "The polynomial degree is strictly greater than 2, the resolver is not implemented yet."
     )
+
+    # Nothing left
+    with pytest.raises(SyntaxError) as e:
+        ret = resolver.solve(expression=" =0")
+    assert str(e.value) == "The equation is not well formated. No left or right part."
