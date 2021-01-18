@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:30 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 20:01:24 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 21:20:58 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,6 +64,9 @@ def test_equation_degree_one():
     ret = resolver.solve(expression=" X*0.001=-0.000001")
     assert ret == "-0.001"
 
+    ret = resolver.solve(expression="5 * X^0 = 4 * X^0 + 7 * X^1")
+    assert ret == "0.14285714285714285"
+
 
 def test_equation_degree_two():
     resolver = ExpressionResolver(verbose=False)
@@ -75,13 +78,13 @@ def test_equation_degree_two():
     assert ret == ["-1.0", "-2.0"]
 
     ret = resolver.solve(expression="x ^2 + x + 1 = 0")
-    assert ret == "No solution in real number."
+    assert ret == ["-0.5+0.866026*i", "-0.5-0.866026*i"]
 
     ret = resolver.solve(expression="4x ^2 + 4x + 1 = 0")
     assert ret == "-0.5"
 
     ret = resolver.solve(expression="-x ^2 + 2x - 3 = 0")
-    assert ret == "No solution in real number."
+    assert ret == ["1.0-1.414214*i", "1.0+1.414214*i"]
 
     ret = resolver.solve(expression="x ^2 + 4x = 0")
     assert ret == ["0.0", "-4.0"]
@@ -90,7 +93,7 @@ def test_equation_degree_two():
     assert ret == "1.0"
 
     ret = resolver.solve(expression="x ^ 2 + 1= 0")
-    assert ret == "No solution in real number."
+    assert ret == ["i", "-i"]
 
     ret = resolver.solve(expression="x^2 -4x + 4 -1= 0")
     assert ret == ["3.0", "1.0"]
@@ -126,6 +129,18 @@ def test_equation_degree_two():
     ret = resolver.solve(expression="-0x^2 - -0X^1  -0X^0    =0")
     assert ret == "X can be any real number."
 
+    # positive discriminant
+    ret = resolver.solve(expression="5 * X^0 + 13 * X^1 + 3 * X^2 = 1 * X^0 + 1 * X^1")
+    assert ret == ["-0.367007", "-3.632993"]
+
+    # Zero discriminant
+    ret = resolver.solve(expression="6 * X^0 + 11 * X^1 + 5 * X^2 = 1 * X^0 + 1 * X^1")
+    assert ret == "-1.0"
+
+    # Negative discriminant
+    ret = resolver.solve(expression="5 * X^0 + 3 * X^1 + 3 * X^2 = 1 * X^0 + 0 * X^1")
+    assert ret == ["-0.5+1.040833*i", "-0.5-1.040833*i"]
+
 
 def test_equations_infinite_solution():
     resolver = ExpressionResolver(verbose=False)
@@ -133,6 +148,12 @@ def test_equations_infinite_solution():
     # Numbers only
     ret = resolver.solve(expression="2 = 2")
     assert ret == "X can be any real number."
+
+    ret = resolver.solve(expression="5 * X^0 = 5 * X^0")
+    assert ret == "X can be any real number."
+
+    ret = resolver.solve(expression="4 * X^0 = 8")
+    assert ret == "There is no solution for this equation."
 
     # Float only
     ret = resolver.solve(expression="2.2456 = 2.2456")

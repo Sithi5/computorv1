@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 19:29:53 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 21:13:07 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -363,7 +363,7 @@ class _Calculator:
         Actually checking there is one and only one var and getting the name of it.
         Also checking notImplemented operations.
         """
-        vars_list = re.findall(pattern=r"[A-Z]+", string="".join(self._tokens))
+        vars_list = re.findall(pattern=r"[a-zA-Z]+", string="".join(self._tokens))
         # Removing duplicate var
         vars_set = list(set(vars_list))
         if len(vars_set) > 1:

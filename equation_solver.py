@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 20:01:09 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 21:23:28 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -129,7 +129,6 @@ class _EquationSolver:
                 left_value = self._polynom_dict_left[key]
             except:
                 left_value = 0
-            tokens = []
             tokens = convert_to_tokens(
                 convert_signed_number(
                     parse_sign(str(left_value) + "-" + str(right_value)), accept_var=True
@@ -173,22 +172,49 @@ class _EquationSolver:
         except:
             c = 0.0
 
-        print(" a = ", a, " b = ", b, " c = ", c) if self._verbose is True else None
+        print("a = ", a, " b = ", b, " c = ", c) if self._verbose is True else None
 
         discriminant = self._get_discriminant(a, b, c)
-        print("discriminant = ", discriminant) if self._verbose is True else None
+        if discriminant > 0:
+            print("The discriminant is strictly positive.")
+        elif discriminant == 0:
+            print("The discriminant is exactly zero.")
+        else:
+            print("The discriminant is strictly negative.")
+        print("discriminant = ", discriminant)
         if discriminant > 0:
             self.solution = []
             solution_one = (-b + my_sqrt(discriminant)) / (2 * a)
             solution_two = (-b - my_sqrt(discriminant)) / (2 * a)
+            if solution_one == "-0.0":
+                solution_one = "0.0"
+            if solution_two == "-0.0":
+                solution_two = "0.0"
             self.solution.append(str(my_round(solution_one, 6)))
             self.solution.append(str(my_round(solution_two, 6)))
         elif discriminant == 0:
             self.solution = str((-b) / (2 * a))
+            if self.solution == "-0.0":
+                self.solution = "0.0"
         else:
-            self.solution = "No solution in real number."
-        if self.solution == "-0.0":
-            self.solution = "0.0"
+            print("There is two solutions in complex number.")
+            self.solution = []
+            discriminant = -discriminant
+            solution_one = convert_signed_number(
+                f"{-b} / (2 * {a}) + i * {my_sqrt(discriminant)} / (2 * {a})".replace(" ", "")
+            )
+            tokens = convert_to_tokens(
+                convert_signed_number(parse_sign(solution_one), accept_var=True)
+            )
+            self.solution.append(self._calculator.solve(tokens=tokens, verbose=False))
+
+            solution_two = f"{-b} / (2 * {a}) - i * {my_sqrt(discriminant)} / (2 * {a})".replace(
+                " ", ""
+            )
+            tokens = convert_to_tokens(
+                convert_signed_number(parse_sign(solution_two), accept_var=True)
+            )
+            self.solution.append(self._calculator.solve(tokens=tokens, verbose=False))
 
     def _solve_polynom_degree_one(self):
         try:

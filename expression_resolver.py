@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 13:36:20 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 21:10:34 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -217,10 +217,10 @@ class ExpressionResolver:
                 "There is no operators or sign in the expression. Nothing to do here."
             )
 
+        # To put before convert_signed_number because it is creating parenthesis
         self.expression = parse_sign(self.expression)
         print("Parsing signs : ", self.expression) if self._verbose is True else None
 
-        # To put before convert_signed_number because it is creating parenthesis
         self._get_vars()
         print("vars = ", self._vars_set) if self._verbose is True else None
 
