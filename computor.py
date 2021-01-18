@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:45 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 15:50:14 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 19:09:50 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,8 +32,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     resolver = ExpressionResolver(verbose=args.verbose)
-    result = resolver.solve(args.expression)
     try:
+        result = resolver.solve(args.expression)
         if isinstance(result, list):
             print("The ", len(result), " solutions are :")
             for res in result:

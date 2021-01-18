@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 17:52:21 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 19:27:22 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -93,7 +93,6 @@ class _EquationSolver:
         index = 0
         part = ""
         sign = "+"
-        print("simplified_part = ", simplified_part)
         while index < len(simplified_part):
             if simplified_part[index] in _SIGN and len(part) > 0:
                 if self._check_have_var(part):
@@ -188,6 +187,8 @@ class _EquationSolver:
             self.solution = str((-b) / (2 * a))
         else:
             self.solution = "No solution in real number."
+        if self.solution == "-0.0":
+            self.solution = "0.0"
 
     def _solve_polynom_degree_one(self):
         try:
@@ -207,6 +208,8 @@ class _EquationSolver:
                 self.solution = "There is no solution for this equation."
             else:
                 self.solution = "X can be any real number."
+        if self.solution == "-0.0":
+            self.solution = "0.0"
 
     def _check_var_negative_power(self, string: str) -> bool:
         split = string.split(self.var_name + "^")
@@ -245,18 +248,23 @@ class _EquationSolver:
             else:
                 self.solution = "The equation is False."
         else:
+            self._reduced_form = ""
             for key, value in self._polynom_dict_left.items():
                 if self._reduced_form and len(self._reduced_form) > 0:
-                    self._reduced_form = self._reduced_form + "+" + str(value)
+                    if value != "0.0":
+                        self._reduced_form = self._reduced_form + "+" + str(value)
                 else:
-                    self._reduced_form = str(value)
+                    if value != "0.0":
+                        self._reduced_form = str(value)
+            if len(self._reduced_form) == 0:
+                self._reduced_form = "0.0"
             self._reduced_form = parse_sign(self._reduced_form) + "=0.0"
 
-            print("Reduced form : ", self._reduced_form) if self._verbose is True else None
+            print("Reduced form : ", self._reduced_form)
 
             self._check_polynom_degree()
 
-            print("Polynomial degree: ", self._polynom_degree) if self._verbose is True else None
+            print("Polynomial degree: ", self._polynom_degree)
 
             if self._polynom_degree > 2:
                 raise NotImplementedError(

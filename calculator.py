@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 18:00:16 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 19:12:14 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -105,6 +105,8 @@ class _Calculator:
         if not self._check_have_var(first_var):
             raise NotImplementedError("Cannot divide a number by a var for the moment.")
         elif not self._check_have_var(second_var):
+            if second_var == "0.0":
+                raise ValueError("Cannot divide by 0.")
             sum_power = first_var_power
             removed_var1_name = first_var.replace(self.var_name, "1")
             tokens = []
@@ -167,22 +169,27 @@ class _Calculator:
         second_var = convert_signed_number(second_var.split("^")[0], accept_var=True)
 
         if not self._check_have_var(first_var):
-            sum_power = second_var_power
-            remove_var_name = second_var.replace(self.var_name, "1")
-            tokens = []
-            tokens = convert_to_tokens(first_var + "*" + remove_var_name)
-            result = self.solve(tokens, internal=True)
-            if float(result) != 1 and float(result) != -1:
-                if float(sum_power) == 0:
-                    return result
-                return result + "*" + self._write_power_to_var(var=self.var_name, power=sum_power)
+            if first_var == "0.0":
+                return "0.0"
             else:
-                if float(sum_power) == 0:
-                    return "1"
-                elif float(result) == -1:
-                    return "-" + self._write_power_to_var(var=self.var_name, power=sum_power)
+                sum_power = second_var_power
+                remove_var_name = second_var.replace(self.var_name, "1")
+                tokens = []
+                tokens = convert_to_tokens(first_var + "*" + remove_var_name)
+                result = self.solve(tokens, internal=True)
+                if float(result) != 1 and float(result) != -1:
+                    if float(sum_power) == 0:
+                        return result
+                    return (
+                        result + "*" + self._write_power_to_var(var=self.var_name, power=sum_power)
+                    )
                 else:
-                    return self._write_power_to_var(var=self.var_name, power=sum_power)
+                    if float(sum_power) == 0:
+                        return "1"
+                    elif float(result) == -1:
+                        return "-" + self._write_power_to_var(var=self.var_name, power=sum_power)
+                    else:
+                        return self._write_power_to_var(var=self.var_name, power=sum_power)
 
         elif not self._check_have_var(second_var):
             sum_power = first_var_power
@@ -309,7 +316,8 @@ class _Calculator:
             )
 
         if var_is_present:
-            if c != 0:
+            print("c = ", c)
+            if c != 0.0:
                 # Parse sign because could have duplicate sign with the add of the +
                 return parse_sign(str(c) + "+" + str(stack[0]))
             else:
@@ -375,7 +383,6 @@ class _Calculator:
         if not internal:
             self._check_vars()
         npi = self.npi_converter(self._tokens, accept_var=True if self.var_name else False)
-        print("Token converted to npi system : ", npi)
         print("Token converted to npi system : ", npi) if self._verbose is True else None
         result = self.resolve_npi(npi)
         return result
