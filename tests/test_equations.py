@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:30 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 19:29:10 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 20:01:24 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -56,6 +56,13 @@ def test_equation_degree_one():
 
     ret = resolver.solve(expression="-0x^2 - -X^1  -0X^0    =0")
     assert ret == "0.0"
+
+    # Multiplier small after var
+    ret = resolver.solve(expression=" X*0.001=0.000001")
+    assert ret == "0.001"
+
+    ret = resolver.solve(expression=" X*0.001=-0.000001")
+    assert ret == "-0.001"
 
 
 def test_equation_degree_two():

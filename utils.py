@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/03 18:10:41 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 12:49:43 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 19:46:55 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -153,11 +153,10 @@ def get_var_multiplier(var, var_name) -> float:
         var = -1
     elif len(var) < 1:
         var = 1
-
     return float(var)
 
 
-def my_round(number: float, precision: int = 2) -> float:
+def my_round(number: float, precision: int = 6) -> float:
     """
     Round the number after 'precision' digits after the comma.
     """

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 19:27:22 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 20:01:09 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -227,8 +227,13 @@ class _EquationSolver:
         self._check_vars()
         self._set_parts()
 
+        # Bellow if for simplified part prevent float convertion to scientific notation
         simplified_left = self._calculator.solve(self._left_part)
+        if self.var_name not in simplified_left:
+            simplified_left = f"{float(simplified_left):.6f}"
         simplified_right = self._calculator.solve(self._right_part)
+        if self.var_name not in simplified_right:
+            simplified_right = f"{float(simplified_right):.6f}"
         print("Simplified left part : ", simplified_left) if self._verbose is True else None
         print("Simplified right part : ", simplified_right) if self._verbose is True else None
         if self.var_name != "":
