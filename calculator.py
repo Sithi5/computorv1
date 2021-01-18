@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 21:13:07 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 00:38:37 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -106,7 +106,9 @@ class _Calculator:
             raise NotImplementedError("Cannot divide a number by a var for the moment.")
         elif not self._check_have_var(second_var):
             if second_var == "0.0":
-                raise ValueError("Cannot divide by 0.")
+                raise ValueError(
+                    "The expression lead to a division by zero : ", first_var, " % ", second_var
+                )
             sum_power = first_var_power
             removed_var1_name = first_var.replace(self.var_name, "1")
             tokens = []
@@ -275,7 +277,6 @@ class _Calculator:
                                 first_var=str(last_two_in_stack[0]),
                                 second_var=str(last_two_in_stack[1]),
                             )
-                    # mult of var
                     elif elem == "*":
                         result = self._multiply_a_var(
                             str(last_two_in_stack[0]), str(last_two_in_stack[1])
@@ -301,8 +302,22 @@ class _Calculator:
                 elif elem == "*":
                     result = my_round(float(last_two_in_stack[0]) * float(last_two_in_stack[1]))
                 elif elem == "/":
+                    if float(last_two_in_stack[1]) == 0.0:
+                        raise ValueError(
+                            "The expression lead to a division by zero : ",
+                            float(last_two_in_stack[0]),
+                            " % ",
+                            float(last_two_in_stack[1]),
+                        )
                     result = my_round(float(last_two_in_stack[0]) / float(last_two_in_stack[1]))
                 elif elem == "%":
+                    if float(last_two_in_stack[1]) == 0.0:
+                        raise ValueError(
+                            "The expression lead to a modulo zero : ",
+                            float(last_two_in_stack[0]),
+                            " % ",
+                            float(last_two_in_stack[1]),
+                        )
                     result = my_round(float(last_two_in_stack[0]) % float(last_two_in_stack[1]))
                 elif elem == "+":
                     result = my_round(float(last_two_in_stack[0]) + float(last_two_in_stack[1]))

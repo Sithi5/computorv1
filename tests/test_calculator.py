@@ -277,3 +277,23 @@ def test_calculator_wrong_args():
     with pytest.raises(NotImplementedError) as e:
         ret = resolver.solve(expression="50^X")
     assert str(e.value) == "Cannot power a number by a var for the moment."
+
+    # Test dividing by zero
+    with pytest.raises(ValueError) as e:
+        ret = resolver.solve(expression="50/0")
+    assert str(e.value) == "('The expression lead to a division by zero : ', 50.0, ' % ', 0.0)"
+
+    # Test modulo by zero
+    with pytest.raises(ValueError) as e:
+        ret = resolver.solve(expression="50%0")
+    assert str(e.value) == "('The expression lead to a modulo zero : ', 50.0, ' % ', 0.0)"
+
+    # Test dividing by zero for a var
+    with pytest.raises(ValueError) as e:
+        ret = resolver.solve(expression="X/0")
+    assert str(e.value) == "('The expression lead to a division by zero : ', 'X', ' % ', '0.0')"
+
+    # Test modulo by zero for a var
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="X%0")
+    assert str(e.value) == "This type of operation with vars is not accepted for the moment."
