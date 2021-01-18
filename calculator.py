@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 12:29:06 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 18:00:16 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -57,23 +57,30 @@ class _Calculator:
         if len(split) == 1:
             return 1
         else:
-            return float(split[1])
+            return split[1]
 
     def _write_power_to_var(self, var, power):
         if float(power) != int(float(power)):
-            raise ValueError("irrational numbers are not accepted as exponent.")
+            raise NotImplementedError("irrational numbers are not accepted as exponent.")
         if float(power) == 1:
             return var
         return var + "^" + str(power)
 
     def _power_a_var(self, first_var: str, second_var: str):
 
+        sign = ""
+        if first_var[0] in _SIGN:
+            sign = first_var[0]
         first_var_power = str(self._get_power(first_var))
 
         # Cutting respective power and convert signed numbers
         first_var = convert_signed_number(first_var.split("^")[0], accept_var=True)
         second_var = convert_signed_number(second_var.split("^")[0], accept_var=True)
-
+        second_var = self.solve(convert_to_tokens(second_var), internal=True)
+        if is_number(second_var) and float(second_var) != int(float(second_var)):
+            raise NotImplementedError("irrational numbers are not accepted as exponent.")
+        if is_number(second_var) and float(second_var) < 0:
+            raise NotImplementedError(f"Some part of the polynomial var have negative power.")
         if not self._check_have_var(first_var):
             raise NotImplementedError("Cannot power a number by a var for the moment.")
         elif self._check_have_var(second_var):
@@ -84,7 +91,7 @@ class _Calculator:
             sum_power = self.solve(tokens, internal=True)
             if float(sum_power) == 0:
                 return "1"
-            return self._write_power_to_var(var=self.var_name, power=sum_power)
+            return sign + self._write_power_to_var(var=self.var_name, power=sum_power)
 
     def _divide_a_var(self, first_var: str, second_var: str):
 
@@ -292,7 +299,6 @@ class _Calculator:
                     result = my_round(float(last_two_in_stack[0]) % float(last_two_in_stack[1]))
                 elif elem == "+":
                     result = my_round(float(last_two_in_stack[0]) + float(last_two_in_stack[1]))
-                    print("laaa ", result)
                 elif elem == "-":
                     result = my_round(float(last_two_in_stack[0]) - float(last_two_in_stack[1]), 6)
                 stack.append(result)
@@ -309,7 +315,7 @@ class _Calculator:
             else:
                 return str(stack[0])
         else:
-            return stack[0]
+            return str(stack[0])
 
     def npi_converter(self, tokens, accept_var=False):
         """
@@ -369,6 +375,7 @@ class _Calculator:
         if not internal:
             self._check_vars()
         npi = self.npi_converter(self._tokens, accept_var=True if self.var_name else False)
+        print("Token converted to npi system : ", npi)
         print("Token converted to npi system : ", npi) if self._verbose is True else None
         result = self.resolve_npi(npi)
         return result

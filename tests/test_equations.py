@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:30 by mabouce           #+#    #+#              #
-#    Updated: 2020/12/11 16:42:06 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 17:51:39 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,71 +21,126 @@ def test_equation_subject():
     resolver = ExpressionResolver(verbose=False)
 
     ret = resolver.solve(expression="5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0")
-    assert ret == [-0.475131, 0.905239]
+    assert ret == ["-0.475131", "0.905239"]
 
-    # ret = resolver.solve(expression="5 * X^0 + 4 * X^1 = 4 * X^0")
+    ret = resolver.solve(expression="5 * X^0 + 4 * X^1 = 4 * X^0")
+    assert ret == "-0.25"
 
-    # with pytest.raises(NotImplementedError) as e:
-    #     ret = resolver.solve(expression="8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0")
-    # assert (
-    #     str(e.value)
-    #     == "The polynomial degree is strictly greater than 2, the resolver is not implemented yet."
-    # )
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0")
+    assert (
+        str(e.value)
+        == "The polynomial degree is strictly greater than 2, the resolver is not implemented yet."
+    )
 
-    # ret = resolver.solve(expression="5 + 4 * X + X^2= X^2")
+    ret = resolver.solve(expression="5 + 4 * X + X^2= X^2")
 
 
-def test_equations_degree_one():
+def test_equation_degree_one():
     resolver = ExpressionResolver(verbose=False)
 
-    # Polynomial degree 1 with parenthesis to calc, no solution
-    # ret = resolver.solve(
-    #     expression="2 + (42 * (10 + 5) )(58*2) + 2 * X^0 + 5(25 * -2)- 2 = (42 * 10) * X^0"
-    # )
-    # 72 830 + 2 X ^0
+    ret = resolver.solve(expression="5 * X^0 + 4 * X^1 = 41 * X^0")
+    assert ret == "9.0"
 
-    # Polynomial degree 1 with parenthesis to calc, no solution
-    # ret = resolver.solve(expression="52 + 2 * X^0 * 4 -1 + 6 *  2 x  - 5 * 2= (42 * 10) * X^0")
+    ret = resolver.solve(expression="-51516544 * X^0 + 4241.1 * X^1 + 1213545 = ---41 * X^0 + -X^1")
+    assert ret == "11858.032106739585"
 
-    # # Multiplying var
-    # ret = resolver.solve(expression="52 + 2 * X^5 * 4X -1 + 6 *  2 * x = 0")
+    ret = resolver.solve(expression="X ^1 = X ^ 1")
+    assert ret == "X can be any real number."
 
-    # # Polynomial degree 1 with parenthesis to calc
-    # ret = resolver.solve(expression="-42 + (10 + 5)(58*2) + X^0 = (42 * 10) * X^0")
+    ret = resolver.solve(expression="X = X")
+    assert ret == "X can be any real number."
 
-    # def test_equations_degree_two():
-    #     resolver = ExpressionResolver()
-
-    #     # Polynomial degree 2
-    #     ret = resolver.solve(expression="5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0")
-
-    # def test_wrong_equation():
-    #     resolver = ExpressionResolver()
-
-    #     # Polynomial degree 3, not implemented
-    #     ret = resolver.solve(expression="8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0")
-
-    # # Polynomial degree 1, with a var in parenthesis
-    # with pytest.raises(NotImplementedError) as e:
-    #     ret = resolver.solve(expression="(42 * (10 + 5) )(58*2x) + X^0 = (42 * 10) * X^0")
-    # assert str(e.value) == "Variable between parenthesis is not supported yet."
+    ret = resolver.solve(expression="X^0 = X^0")
+    assert ret == "X can be any real number."
 
 
-# def test_equations_degree_two():
-#     resolver = ExpressionResolver(verbose=False)
+def test_equation_degree_two():
+    resolver = ExpressionResolver(verbose=False)
 
-#     # Positive equation
-#     ret = resolver.solve(expression="2x^2 + -x - 6 = 0")
-#     assert ret == [2.0, -1.5]
+    ret = resolver.solve(expression="x^2+x-2 = 0")
+    assert ret == ["1.0", "-2.0"]
 
-#     ret = resolver.solve(expression=" 6x^2 + 11x - 35 = 0")
-#     assert ret == [5 / 3, -7 / 2]
+    ret = resolver.solve(expression="x^2+3x+2=0")
+    assert ret == ["-1.0", "-2.0"]
 
-#     ret = resolver.solve(expression="2x^2-4x-2=0")
-#     assert ret == [2.414213562373095, -0.4142135623730949]
+    ret = resolver.solve(expression="x ^2 + x + 1 = 0")
+    assert ret == "No solution in real number."
 
-#     # Zero equation
+    ret = resolver.solve(expression="4x ^2 + 4x + 1 = 0")
+    assert ret == "-0.5"
 
-#     # Negative equation
-#     ret = resolver.solve(expression="   x^2 + 3x + 10 = 0")
-#     assert ret == "No solution in real number."
+    ret = resolver.solve(expression="-x ^2 + 2x - 3 = 0")
+    assert ret == "No solution in real number."
+
+    ret = resolver.solve(expression="x ^2 + 4x = 0")
+    assert ret == ["0.0", "-4.0"]
+
+    ret = resolver.solve(expression="x ^2 -2x + 1 = 0")
+    assert ret == "1.0"
+
+    ret = resolver.solve(expression="x ^ 2 + 1= 0")
+    assert ret == "No solution in real number."
+
+    ret = resolver.solve(expression="x^2 -4x + 4 -1= 0")
+    assert ret == ["3.0", "1.0"]
+
+
+def test_equations_infinite_solution():
+    resolver = ExpressionResolver(verbose=False)
+
+    # Numbers only
+    ret = resolver.solve(expression="2 = 2")
+    assert ret == "X can be any real number."
+
+    # Float only
+    ret = resolver.solve(expression="2.2456 = 2.2456")
+    assert ret == "X can be any real number."
+
+
+def test_wrong_equation():
+    resolver = ExpressionResolver(verbose=False)
+
+    # Numbers only false
+    ret = resolver.solve(expression="2 = -2")
+    assert ret == "The equation is False."
+
+    # Numbers with var^0 false
+    ret = resolver.solve(expression="2*X^0 = -2*X^0")
+    assert ret == "There is no solution for this equation."
+
+    # Float only false
+    ret = resolver.solve(expression="2.2456 = -2.2456")
+    assert ret == "The equation is False."
+
+    # power var with negative value
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="2 = -2X^-5")
+    assert str(e.value) == "Some part of the polynomial var have negative power."
+
+    # power var with negative value
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="2 = -2X^(-5)")
+    assert str(e.value) == "Some part of the polynomial var have negative power."
+
+    # power var with irational value
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="2 = -2X^5.00000005")
+    assert str(e.value) == "irrational numbers are not accepted as exponent."
+
+    # power var with negative irrational value
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="2 = -2X^-5.00000005")
+    assert str(e.value) == "Some part of the polynomial var have negative power."
+
+    # power var with negative irrational value
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="2 = -2X^((-5.00000005))")
+    assert str(e.value) == "Some part of the polynomial var have negative power."
+
+    with pytest.raises(NotImplementedError) as e:
+        ret = resolver.solve(expression="x^3 + 2x^2 -3x = 0")
+    assert (
+        str(e.value)
+        == "The polynomial degree is strictly greater than 2, the resolver is not implemented yet."
+    )

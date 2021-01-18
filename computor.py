@@ -6,14 +6,17 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:45 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 11:17:28 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 15:50:14 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
+import sys
 import argparse, parser
 
 from expression_resolver import ExpressionResolver
 from exception import NothingToDoError
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 
 def main(argv=None):
@@ -29,8 +32,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     resolver = ExpressionResolver(verbose=args.verbose)
+    result = resolver.solve(args.expression)
     try:
-        result = resolver.solve(args.expression)
         if isinstance(result, list):
             print("The ", len(result), " solutions are :")
             for res in result:

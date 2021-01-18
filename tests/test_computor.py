@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 11:46:22 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/18 16:42:58 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,15 +41,15 @@ def test_expression_parser():
 
     # Extra zero
     ret = resolver.solve(expression="04578 + 000450")
-    assert ret == 5028
+    assert ret == "5028.0"
 
     # Test method _replace_zero_power_by_one
     ret = resolver.solve(expression="04578 + 15000 ^0")
-    assert ret == 4579
+    assert ret == "4579.0"
 
     # Test method _replace_zero_power_by_one, the following one shouln't proc because it use a parenthesis
     ret = resolver.solve(expression="04578 + (15000 * 450)^0")
-    assert ret == 4579
+    assert ret == "4579.0"
 
     # Test replacing sign before numbers
     ret = resolver.solve(expression="-4 + (+15 * -45)-0")

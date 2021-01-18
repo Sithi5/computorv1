@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/15 11:17:11 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/15 13:36:20 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -209,7 +209,7 @@ class ExpressionResolver:
 
         # Checking if there is any sign or operator in the expression
         ok = False
-        for operator in _OPERATORS + _SIGN:
+        for operator in _OPERATORS + _SIGN + "=":
             if operator in self.expression:
                 ok = True
         if ok is False:
