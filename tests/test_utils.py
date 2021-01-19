@@ -1,49 +1,27 @@
 import pytest
-
 import math
-
-import hypothesis.strategies as st
-
-from hypothesis import given, seed
 
 from utils import my_power, my_sqrt, my_round
 
 
-# @given(st.floats(), st.integers())
-# def test_my_power_hypothesis(number, my_power_number):
-#     my_result = my_power(number, my_power_number)
-
-
-# @given(st.floats(min_value=0))
-# def test_my_sqrt_hypothesis(number):
-#     print("number = ", number)
-#     my_result = math.sqrt(number)
-#     my_result = my_sqrt(number)
-
-
-# @given(st.floats(), st.integers(min_value=0, max_value=20))
-# def test_my_round_hypothesis(number, precision):
-#     my_result = my_round(number, precision)
-
-
-# def test_my_power():
-#     assert my_power(number=0, power=1500) == 0
-#     assert my_power(number=0, power=-1500) == 0
-#     assert my_power(number=0, power=0) == 1
-#     assert my_power(number=500, power=0) == 1
-#     assert my_power(number=-500, power=0) == 1
-#     assert my_power(number=-4.54221, power=0) == 1
-#     assert my_power(number=4.54221, power=0) == 1
-#     assert my_power(number=5, power=5) == 3125
-#     assert my_power(number=5, power=1000000000) == float("infinity")
-#     assert my_power(number=5, power=-1000000000) == 0
-#     with pytest.raises(ValueError) as e:
-#         ret = my_power(number=5, power=0.0000000000000000001) == 0
-#     assert str(e.value) == "irrational numbers are not accepted as exponent."
-#     assert str(e.value) == "irrational numbers are not accepted as exponent."
-#     assert my_power(number=0.0000000000000000000000000000001, power=2) == 1.0000000000000003e-62
-#     assert my_power(number=999999999999999999999999999999999999999, power=2) == float("infinity")
-#     assert my_power(number=3, power=-3) == 0.037037037037037035
+def test_my_power():
+    assert my_power(number=0, power=1500) == 0
+    assert my_power(number=0, power=-1500) == 0
+    assert my_power(number=0, power=0) == 1
+    assert my_power(number=500, power=0) == 1
+    assert my_power(number=-500, power=0) == 1
+    assert my_power(number=-4.54221, power=0) == 1
+    assert my_power(number=4.54221, power=0) == 1
+    assert my_power(number=5, power=5) == 3125
+    assert my_power(number=5, power=1000000000) == float("infinity")
+    assert my_power(number=5, power=-1000000000) == 0
+    with pytest.raises(ValueError) as e:
+        ret = my_power(number=5, power=0.0000000000000000001) == 0
+    assert str(e.value) == "irrational numbers are not accepted as exponent."
+    assert str(e.value) == "irrational numbers are not accepted as exponent."
+    assert my_power(number=0.0000000000000000000000000000001, power=2) == 1.0000000000000003e-62
+    assert my_power(number=999999999999999999999999999999999999999, power=2) == float("infinity")
+    assert my_power(number=3, power=-3) == 0.037037037037037035
 
 
 def test_my_sqrt():

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 21:23:28 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 13:03:01 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -128,7 +128,7 @@ class _EquationSolver:
             try:
                 left_value = self._polynom_dict_left[key]
             except:
-                left_value = 0
+                left_value = 0.0
             tokens = convert_to_tokens(
                 convert_signed_number(
                     parse_sign(str(left_value) + "-" + str(right_value)), accept_var=True
@@ -245,6 +245,24 @@ class _EquationSolver:
                 raise NotImplementedError(f"Some part of the polynomial var have negative power.")
             index += 1
 
+    def _reduced_form(self):
+        self._reduced_form = ""
+        for key, value in self._polynom_dict_left.items():
+            # Remove extra zero for print
+            if self.var_name not in value:
+                value = float(value)
+            if self._reduced_form and len(self._reduced_form) > 0:
+                if value != "0.0":
+                    self._reduced_form = self._reduced_form + "+" + str(value)
+            else:
+                if value != "0.0":
+                    self._reduced_form = str(value)
+        if len(self._reduced_form) == 0:
+            self._reduced_form = "0.0"
+        self._reduced_form = parse_sign(self._reduced_form) + "=0.0"
+
+        print("Reduced form : ", self._reduced_form)
+
     def solve(self, tokens: list, verbose: bool = False):
         self._verbose = verbose
         self._tokens = tokens
@@ -253,8 +271,8 @@ class _EquationSolver:
         self._check_vars()
         self._set_parts()
 
-        # Bellow if for simplified part prevent float convertion to scientific notation
         simplified_left = self._calculator.solve(self._left_part)
+        # Bellow both if for simplified part prevent float convertion to scientific notation
         if self.var_name not in simplified_left:
             simplified_left = f"{float(simplified_left):.6f}"
         simplified_right = self._calculator.solve(self._right_part)
@@ -273,26 +291,14 @@ class _EquationSolver:
         if self.var_name == "":
             print(
                 "There is no var in the equation, considering there is an X^0(=1), checking if the statement is true"
-            ) if self._verbose is True else None
+            )
             if simplified_left == simplified_right:
                 self.solution = "X can be any real number."
             else:
                 self.solution = "The equation is False."
+            self._reduced_form()
         else:
-            self._reduced_form = ""
-            for key, value in self._polynom_dict_left.items():
-                if self._reduced_form and len(self._reduced_form) > 0:
-                    if value != "0.0":
-                        self._reduced_form = self._reduced_form + "+" + str(value)
-                else:
-                    if value != "0.0":
-                        self._reduced_form = str(value)
-            if len(self._reduced_form) == 0:
-                self._reduced_form = "0.0"
-            self._reduced_form = parse_sign(self._reduced_form) + "=0.0"
-
-            print("Reduced form : ", self._reduced_form)
-
+            self._reduced_form()
             self._check_polynom_degree()
 
             print("Polynomial degree: ", self._polynom_degree)
