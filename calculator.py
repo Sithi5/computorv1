@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 18:14:07 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 18:36:28 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -375,7 +375,6 @@ class _Calculator:
 
         if var_is_present:
             if c != 0.0:
-                print("ici, c = ", c)
                 # Parse sign because could have duplicate sign with the add of the +
                 return parse_sign(str(c) + "+" + str(stack[0]))
             else:
