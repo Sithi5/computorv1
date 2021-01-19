@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 17:44:46 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 18:28:28 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -240,8 +240,8 @@ class _EquationSolver:
         except:
             c = 0.0
 
-        print(" b = ", b, " c = ", c) if self._verbose is True else None
-        if b != 0:
+        print("b = ", b, " c = ", c) if self._verbose is True else None
+        if b != 0.0:
             self.solution = str(-(c / b))
         else:
             if b != c:
@@ -261,7 +261,7 @@ class _EquationSolver:
 
     def _reduced_form(self):
         self._reduced_form = ""
-        a, b, c = "0.0"
+        a, b, c = "0.0", "0.0", "0.0"
         for key, value in self._polynom_dict_left.items():
             if key == "a":
                 a = value
@@ -275,6 +275,7 @@ class _EquationSolver:
             self._reduced_form = self._reduced_form + "+" + b
         if c != "0.0":
             self._reduced_form = self._reduced_form + "+" + c
+
         if len(self._reduced_form) == 0:
             self._reduced_form = "0.0"
         self._reduced_form = parse_sign(self._reduced_form) + "=0.0"
