@@ -219,6 +219,26 @@ def test_calculator_with_one_var():
     ret = resolver.solve(expression="50x^(2+5)")
     assert ret == "50.0*X^7.0"
 
+    # Test calc with var
+    ret = resolver.solve(expression="-X ^ 3")
+    assert ret == "-X^3.0"
+
+    # Test calc with var
+    ret = resolver.solve(expression="-X ^ 3 + X ^ 3")
+    assert ret == "0.0"
+
+    # Test calc with var
+    ret = resolver.solve(expression="-X ^ 3 + x + X ^ 3")
+    assert ret == "X"
+
+    # Test calc with var
+    ret = resolver.solve(expression="-X ^ 3 + + x ^ 2 +x + X ^ 3 - x")
+    assert ret == "X^2.0"
+
+    # Test calc with var
+    ret = resolver.solve(expression="-X ^ 3 - 10X ^ 4+ x ^ 2 +x - x ^4 + X ^ 3 - x")
+    assert ret == "-11.0X^4.0+X^2.0"
+
 
 def test_calculator_wrong_args():
     resolver = ExpressionResolver(verbose=False)
@@ -281,7 +301,7 @@ def test_calculator_wrong_args():
     # Test dividing by zero
     with pytest.raises(ValueError) as e:
         ret = resolver.solve(expression="50/0")
-    assert str(e.value) == "('The expression lead to a division by zero : ', 50.0, ' % ', 0.0)"
+    assert str(e.value) == "('The expression lead to a division by zero : ', 50.0, ' / ', 0.0)"
 
     # Test modulo by zero
     with pytest.raises(ValueError) as e:
@@ -291,7 +311,7 @@ def test_calculator_wrong_args():
     # Test dividing by zero for a var
     with pytest.raises(ValueError) as e:
         ret = resolver.solve(expression="X/0")
-    assert str(e.value) == "('The expression lead to a division by zero : ', 'X', ' % ', '0.0')"
+    assert str(e.value) == "('The expression lead to a division by zero : ', 'X', ' / ', '0.0')"
 
     # Test modulo by zero for a var
     with pytest.raises(NotImplementedError) as e:

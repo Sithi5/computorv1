@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/03 18:10:41 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 19:46:55 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 18:03:50 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -129,6 +129,31 @@ def convert_signed_number(expression: str, accept_var: bool = False):
     return expression
 
 
+def add_implicit_cross_operator_for_vars(vars_list: list, expression: str):
+    # Splitting from vars
+    for var in vars_list:
+        splitted_expression = expression.split(var)
+        index = 1
+        while index < len(splitted_expression):
+            # Checking if previous part is not empty
+            if len(splitted_expression[index - 1]) > 0:
+                # Getting previous part to check sign
+                if (
+                    splitted_expression[index - 1][-1].isdecimal() is True
+                    or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
+                ):
+                    splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
+            # Checking implicit mult after the var
+            if splitted_expression[index] and (
+                splitted_expression[index][0].isdecimal() is True
+                or splitted_expression[index][0] in _OPEN_PARENTHESES
+            ):
+                splitted_expression[index] = "*" + splitted_expression[index]
+            index += 1
+        expression = var.join(splitted_expression)
+    return expression
+
+
 def parse_sign(expression: str):
     """
         Removing extra _sign
@@ -137,6 +162,9 @@ def parse_sign(expression: str):
         expression = (
             expression.replace("--", "+").replace("++", "+").replace("+-", "-").replace("-+", "-")
         )
+    if len(expression) > 0:
+        if expression[0] == "+":
+            expression = expression[1:]
     return expression
 
 

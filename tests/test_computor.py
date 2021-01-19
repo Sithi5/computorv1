@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:33 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 16:42:58 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 18:12:17 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -53,6 +53,26 @@ def test_expression_parser():
 
     # Test replacing sign before numbers
     ret = resolver.solve(expression="-4 + (+15 * -45)-0")
+
+    # Test with var
+    ret = resolver.solve(expression="X ^ 2 + X ^ 1 + x ^ 2")
+    assert ret == "2.0X^2.0+X"
+
+    # Test with var
+    ret = resolver.solve(expression="X ^ 2 + x + x")
+    assert ret == "2.0X+X^2.0"
+
+    # Test with var
+    ret = resolver.solve(expression="X ^ 2 + x + x + x ^2")
+    assert ret == "2.0X^2.0+2.0X"
+
+    # Test with var
+    ret = resolver.solve(expression="X ^ 2 + x + x - x ^2")
+    assert ret == "2.0X"
+
+    # Test with var
+    ret = resolver.solve(expression="X ^ 2 + x + x - x ^2 - x")
+    assert ret == "X"
 
 
 def test_wrong_args():
@@ -122,3 +142,17 @@ def test_wrong_args():
     assert (
         str(e.value) == "Operators must be followed by a value or a variable, not another operator."
     )
+
+    # Test BIGGER than float input
+    with pytest.raises(ValueError) as e:
+        ret = resolver.solve(
+            expression="-X ^ 3 * 10X ^ 4+ x ^ 2 +x - x ^4 + X ^ 3 - X^1209349432411111115555555555555555555558888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444 - X"
+        )
+    assert str(e.value) == "A number is too big, no input number should reach float inf or -inf."
+
+    # Test BIGGER than float input
+    with pytest.raises(ValueError) as e:
+        ret = resolver.solve(
+            expression="-X ^ 3 * 10X ^ 4+ x ^ 2 +x - x ^4 + X ^ 3 - 1209349432411111115555555555555555555558888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444 - X"
+        )
+    assert str(e.value) == "A number is too big, no input number should reach float inf or -inf."

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:30 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 13:47:29 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 15:38:54 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -117,7 +117,7 @@ def test_equation_degree_two():
     assert ret == "0.0"
 
     ret = resolver.solve(expression="X ^ 2 - X ^1 - x ^1 = 0")
-    assert ret == ["0.0", "2.0"]
+    assert ret == ["2.0", "0.0"]
 
     # 0 coeff
     ret = resolver.solve(expression="0x^2    =0")

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/18 21:10:34 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 18:10:56 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,12 @@ from globals_vars import (
 )
 from exception import NothingToDoError
 
-from utils import convert_to_tokens, parse_sign, convert_signed_number
+from utils import (
+    convert_to_tokens,
+    parse_sign,
+    convert_signed_number,
+    add_implicit_cross_operator_for_vars,
+)
 
 
 class ExpressionResolver:
@@ -142,33 +147,16 @@ class ExpressionResolver:
                 index += 1
             self.expression = closing_parenthese.join(splitted_expression)
 
-    def _add_implicit_cross_operator_for_vars(self):
-        # Splitting from vars
-        for var in self._vars_set:
-            splitted_expression = self.expression.split(var)
-            index = 1
-            while index < len(splitted_expression):
-                # Checking if previous part is not empty
-                if len(splitted_expression[index - 1]) > 0:
-                    # Getting previous part to check sign
-                    if (
-                        splitted_expression[index - 1][-1].isdecimal() is True
-                        or splitted_expression[index - 1][-1] in _CLOSING_PARENTHESES
-                    ):
-                        splitted_expression[index - 1] = splitted_expression[index - 1] + "*"
-                # Checking implicit mult after the var
-                if splitted_expression[index] and (
-                    splitted_expression[index][0].isdecimal() is True
-                    or splitted_expression[index][0] in _OPEN_PARENTHESES
-                ):
-                    splitted_expression[index] = "*" + splitted_expression[index]
-                index += 1
-            self.expression = var.join(splitted_expression)
-
     def _removing_trailing_zero_and_converting_numbers_to_float(self):
         for index, token in enumerate(self.expression):
             if token.isdecimal():
                 self.expression[index] = str(float(token))
+                if "e" in self.expression[index]:
+                    self.expression[index] = f"{float(token):.6f}"
+                elif "inf" in self.expression[index]:
+                    raise ValueError(
+                        "A number is too big, no input number should reach float inf or -inf."
+                    )
 
     def _get_vars(self):
         vars_list = re.findall(pattern=r"[A-Z]+", string=self.expression)
@@ -229,7 +217,7 @@ class ExpressionResolver:
         print("Convert signed numbers : ", self.expression) if self._verbose is True else None
 
         self._add_implicit_cross_operator_when_parenthesis()
-        self._add_implicit_cross_operator_for_vars()
+        self.expression = add_implicit_cross_operator_for_vars(self._vars_set, self.expression)
 
         print(
             "Convert implicit multiplication : ", self.expression

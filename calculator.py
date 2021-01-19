@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 00:38:37 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 18:14:07 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,6 +26,7 @@ from utils import (
     is_number,
     parse_sign,
     convert_signed_number,
+    add_implicit_cross_operator_for_vars,
     my_power,
     my_round,
 )
@@ -107,7 +108,7 @@ class _Calculator:
         elif not self._check_have_var(second_var):
             if second_var == "0.0":
                 raise ValueError(
-                    "The expression lead to a division by zero : ", first_var, " % ", second_var
+                    "The expression lead to a division by zero : ", first_var, " / ", second_var
                 )
             sum_power = first_var_power
             removed_var1_name = first_var.replace(self.var_name, "1")
@@ -138,26 +139,68 @@ class _Calculator:
                 return result
             return result + "*" + self._write_power_to_var(var=self.var_name, power=sum_power)
 
-    def _add_or_substract_to_var(self, operator: str, first_var: str, second_var: str):
+    def _add_or_substract_var_to_var(self, operator: str, first_var: str, second_var: str):
+        pattern = self.var_name
+        # Checking if multiple var in first_var (ex : x + X ^ 2)
+        if len(re.findall(pattern=pattern, string=first_var)) > 1:
+            second_var_power = str(float(self._get_power(second_var)))
+            if second_var_power != "1.0":
+                # regex that match any sign or none, followed by any number or none
+                # followed by the var name followed by the power of the var
+                pattern = "[{sign}]*[.\d]*[\*]*{var_name}\^{second_var_power}".format(
+                    var_name=self.var_name, second_var_power=second_var_power, sign=_SIGN
+                )
+            else:
+                # Same for simple X, the var name shouln't be followed by a power operator
+                pattern = "[{sign}]*[.\d]*[\*]*{var_name}(?!\^)".format(
+                    var_name=self.var_name, second_var_power=second_var_power, sign=_SIGN
+                )
+            split = re.split(pattern=pattern, string=first_var)
+            if len(split) > 1:
+                search = re.search(pattern=pattern, string=first_var)
+                if search is not None:
+                    # Cutting respective power and convert signed numbers
+                    first_var = add_implicit_cross_operator_for_vars(
+                        vars_list=list(self.var_name),
+                        expression=convert_signed_number(search.group(0), accept_var=True),
+                    )
+                    second_var = add_implicit_cross_operator_for_vars(
+                        vars_list=list(self.var_name),
+                        expression=convert_signed_number(second_var, accept_var=True),
+                    )
+                    tokens = convert_to_tokens(first_var + operator + second_var)
+                    result = self.solve(tokens=tokens, internal=True)
+                    if result == "0.0":
+                        return parse_sign("".join(split))
+                    else:
+                        return parse_sign(result + "+" + "".join(split))
+
         first_var_power = str(self._get_power(first_var))
         second_var_power = str(self._get_power(second_var))
 
-        # Different power, do nothing here
+        # Different power
         if first_var_power != second_var_power:
             return first_var + operator + second_var
 
         # Cutting respective power and convert signed numbers
-        first_var = convert_signed_number(first_var.split("^")[0], accept_var=True)
-        second_var = convert_signed_number(second_var.split("^")[0], accept_var=True)
+        first_var = add_implicit_cross_operator_for_vars(
+            vars_list=list(self.var_name),
+            expression=convert_signed_number(first_var.split("^")[0], accept_var=True),
+        )
+        second_var = add_implicit_cross_operator_for_vars(
+            vars_list=list(self.var_name),
+            expression=convert_signed_number(second_var.split("^")[0], accept_var=True),
+        )
 
         removed_var1_name = first_var.replace(self.var_name, "1")
         removed_var2_name = second_var.replace(self.var_name, "1")
 
-        tokens = []
         tokens = convert_to_tokens(removed_var1_name + operator + removed_var2_name)
         result = self.solve(tokens, internal=True)
         if float(result) == 0:
             return "0.0"
+        elif float(result) == 1:
+            return self._write_power_to_var(var=self.var_name, power=first_var_power)
         else:
             return str(result) + self._write_power_to_var(var=self.var_name, power=first_var_power)
 
@@ -272,7 +315,7 @@ class _Calculator:
                             result = str(last_two_in_stack[0])
                         else:
                             # Adding var to var
-                            result = self._add_or_substract_to_var(
+                            result = self._add_or_substract_var_to_var(
                                 operator=elem,
                                 first_var=str(last_two_in_stack[0]),
                                 second_var=str(last_two_in_stack[1]),
@@ -306,7 +349,7 @@ class _Calculator:
                         raise ValueError(
                             "The expression lead to a division by zero : ",
                             float(last_two_in_stack[0]),
-                            " % ",
+                            " / ",
                             float(last_two_in_stack[1]),
                         )
                     result = my_round(float(last_two_in_stack[0]) / float(last_two_in_stack[1]))
@@ -332,6 +375,7 @@ class _Calculator:
 
         if var_is_present:
             if c != 0.0:
+                print("ici, c = ", c)
                 # Parse sign because could have duplicate sign with the add of the +
                 return parse_sign(str(c) + "+" + str(stack[0]))
             else:
@@ -382,8 +426,12 @@ class _Calculator:
         # Removing duplicate var
         vars_set = list(set(vars_list))
         if len(vars_set) > 1:
+            print("vars_set = ", vars_set)
             raise SyntaxError("Calculator does not accept more than 1 var.")
         self.var_name = "".join(vars_set)
+
+    def _remove_extra_zero(self, expression: str):
+        pass
 
     def solve(self, tokens: list, verbose: bool = False, internal: bool = False) -> str:
         """
@@ -398,5 +446,5 @@ class _Calculator:
             self._check_vars()
         npi = self.npi_converter(self._tokens, accept_var=True if self.var_name else False)
         print("Token converted to npi system : ", npi) if self._verbose is True else None
-        result = self.resolve_npi(npi)
+        result = parse_sign(self.resolve_npi(npi))
         return result

@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 13:03:01 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/19 17:44:46 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -184,15 +184,29 @@ class _EquationSolver:
         print("discriminant = ", discriminant)
         if discriminant > 0:
             self.solution = []
-            solution_one = (-b + my_sqrt(discriminant)) / (2 * a)
-            solution_two = (-b - my_sqrt(discriminant)) / (2 * a)
+            if a == 0:
+                raise ValueError(
+                    "The expression lead to a division by zero : ",
+                    float(str((-b + my_sqrt(discriminant)))),
+                    " / ",
+                    a,
+                )
+            solution_one = str((-b + my_sqrt(discriminant)) / (2 * a))
+            solution_two = str((-b - my_sqrt(discriminant)) / (2 * a))
             if solution_one == "-0.0":
                 solution_one = "0.0"
             if solution_two == "-0.0":
                 solution_two = "0.0"
-            self.solution.append(str(my_round(solution_one, 6)))
-            self.solution.append(str(my_round(solution_two, 6)))
+            self.solution.append(str(my_round(float(solution_one), 6)))
+            self.solution.append(str(my_round(float(solution_two), 6)))
         elif discriminant == 0:
+            if a == 0:
+                raise ValueError(
+                    "The expression lead to a division by zero : ",
+                    float(str((-b + my_sqrt(discriminant)))),
+                    " / ",
+                    a,
+                )
             self.solution = str((-b) / (2 * a))
             if self.solution == "-0.0":
                 self.solution = "0.0"
@@ -247,16 +261,20 @@ class _EquationSolver:
 
     def _reduced_form(self):
         self._reduced_form = ""
+        a, b, c = "0.0"
         for key, value in self._polynom_dict_left.items():
-            # Remove extra zero for print
-            if self.var_name not in value:
-                value = float(value)
-            if self._reduced_form and len(self._reduced_form) > 0:
-                if value != "0.0":
-                    self._reduced_form = self._reduced_form + "+" + str(value)
+            if key == "a":
+                a = value
+            elif key == "b":
+                b = value
             else:
-                if value != "0.0":
-                    self._reduced_form = str(value)
+                c = value
+        if a != "0.0":
+            self._reduced_form = a
+        if b != "0.0":
+            self._reduced_form = self._reduced_form + "+" + b
+        if c != "0.0":
+            self._reduced_form = self._reduced_form + "+" + c
         if len(self._reduced_form) == 0:
             self._reduced_form = "0.0"
         self._reduced_form = parse_sign(self._reduced_form) + "=0.0"
@@ -278,8 +296,6 @@ class _EquationSolver:
         simplified_right = self._calculator.solve(self._right_part)
         if self.var_name not in simplified_right:
             simplified_right = f"{float(simplified_right):.6f}"
-        print("Simplified left part : ", simplified_left) if self._verbose is True else None
-        print("Simplified right part : ", simplified_right) if self._verbose is True else None
         if self.var_name != "":
             self._check_var_negative_power(simplified_left)
             self._check_var_negative_power(simplified_right)
