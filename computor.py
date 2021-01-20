@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:45 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 18:19:25 by mabouce          ###   ########.fr        #
+#    Updated: 2021/01/20 19:01:01 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,8 +15,6 @@ import argparse, parser
 
 from expression_resolver import ExpressionResolver
 from exception import NothingToDoError
-
-sys.stdout.reconfigure(encoding="utf-8")
 
 
 def main(argv=None):
