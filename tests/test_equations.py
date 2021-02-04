@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:30 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 15:38:54 by mabouce          ###   ########.fr        #
+#    Updated: 2021/02/04 11:22:41 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -232,3 +232,13 @@ def test_wrong_equation():
     with pytest.raises(SyntaxError) as e:
         ret = resolver.solve(expression=" =0")
     assert str(e.value) == "The equation is not well formated. No left or right part."
+
+
+def test_others():
+    resolver = ExpressionResolver(verbose=False)
+
+    ret = resolver.solve(expression="0 = X + X")
+    assert ret == "0.0"
+
+    ret = resolver.solve(expression="0 = X ^ 2 + X^ 2")
+    assert ret == "0.0"

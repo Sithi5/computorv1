@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:27 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 18:28:28 by mabouce          ###   ########.fr        #
+#    Updated: 2021/02/04 11:47:19 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,6 +30,7 @@ from utils import (
     my_power,
     my_sqrt,
     my_round,
+    add_implicit_cross_operator_for_vars,
 )
 
 
@@ -131,10 +132,19 @@ class _EquationSolver:
                 left_value = 0.0
             tokens = convert_to_tokens(
                 convert_signed_number(
-                    parse_sign(str(left_value) + "-" + str(right_value)), accept_var=True
+                    parse_sign(
+                        add_implicit_cross_operator_for_vars(list(self.var_name), str(left_value))
+                        + "-"
+                        + add_implicit_cross_operator_for_vars(
+                            list(self.var_name), str(right_value)
+                        )
+                    ),
+                    accept_var=True,
                 )
             )
-            self._polynom_dict_left[key] = self._calculator.solve(tokens, verbose=False)
+            self._polynom_dict_left[key] = self._calculator.solve(
+                tokens=tokens, verbose=self._force_calculator_verbose
+            )
 
     def _check_polynom_degree(self):
         polynom_max_degree = 0.0
@@ -220,7 +230,9 @@ class _EquationSolver:
             tokens = convert_to_tokens(
                 convert_signed_number(parse_sign(solution_one), accept_var=True)
             )
-            self.solution.append(self._calculator.solve(tokens=tokens, verbose=False))
+            self.solution.append(
+                self._calculator.solve(tokens=tokens, verbose=self._force_calculator_verbose)
+            )
 
             solution_two = f"{-b} / (2 * {a}) - i * {my_sqrt(discriminant)} / (2 * {a})".replace(
                 " ", ""
@@ -228,7 +240,9 @@ class _EquationSolver:
             tokens = convert_to_tokens(
                 convert_signed_number(parse_sign(solution_two), accept_var=True)
             )
-            self.solution.append(self._calculator.solve(tokens=tokens, verbose=False))
+            self.solution.append(
+                self._calculator.solve(tokens=tokens, verbose=self._force_calculator_verbose)
+            )
 
     def _solve_polynom_degree_one(self):
         try:
@@ -282,19 +296,29 @@ class _EquationSolver:
 
         print("Reduced form : ", self._reduced_form)
 
-    def solve(self, tokens: list, verbose: bool = False):
+    def solve(self, tokens: list, verbose: bool = False, force_calculator_verbose: bool = False):
         self._verbose = verbose
+        self._force_calculator_verbose = force_calculator_verbose
         self._tokens = tokens
         self._left_part.clear()
         self._right_part.clear()
         self._check_vars()
         self._set_parts()
 
-        simplified_left = self._calculator.solve(self._left_part)
+        print("\nEQUATION SOLVER\n") if self._verbose is True else None
+        print("Reducing left equation :") if self._verbose is True else None
+        simplified_left = self._calculator.solve(
+            tokens=self._left_part, verbose=self._force_calculator_verbose
+        )
+        print("Reduced left : ", simplified_left) if self._verbose is True else None
         # Bellow both if for simplified part prevent float convertion to scientific notation
         if self.var_name not in simplified_left:
             simplified_left = f"{float(simplified_left):.6f}"
-        simplified_right = self._calculator.solve(self._right_part)
+        print("Reducing right equation :") if self._verbose is True else None
+        simplified_right = self._calculator.solve(
+            tokens=self._right_part, verbose=self._force_calculator_verbose
+        )
+        print("Reduced right : ", simplified_right) if self._verbose is True else None
         if self.var_name not in simplified_right:
             simplified_right = f"{float(simplified_right):.6f}"
         if self.var_name != "":
@@ -329,4 +353,5 @@ class _EquationSolver:
             else:
                 self._solve_polynom_degree_one()
 
+        print("\nEND OF EQUATION SOLVER\n----------\n") if self._verbose is True else None
         return self.solution

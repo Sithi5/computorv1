@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 21:41:09 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 18:10:56 by mabouce          ###   ########.fr        #
+#    Updated: 2021/02/04 11:47:28 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,10 +37,12 @@ class ExpressionResolver:
     expression = None
     _vars_set = None
     _verbose = None
+    _force_calculator_verbose = None
     _solver = None
 
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, force_calculator_verbose: bool = False):
         self._verbose = verbose
+        self._force_calculator_verbose = force_calculator_verbose
 
     def _check_args(self):
         # Var to check operator is followed by alphanum.
@@ -252,7 +254,15 @@ class ExpressionResolver:
         """
             Use the solver of the class set by set_solver to solve the expression.
         """
+        print("\nEXPRESSION RESOLVER\n") if self._verbose is True else None
         self.expression = expression.upper()
         self._parse_expression()
         self._set_solver()
-        return self._solver.solve(self.expression, verbose=self._verbose)
+        result = self._solver.solve(
+            self.expression,
+            verbose=self._verbose,
+            force_calculator_verbose=self._force_calculator_verbose,
+        )
+        print("\nEND OF EXPRESSION RESOLVER\n----------\n") if self._verbose is True else None
+        return result
+

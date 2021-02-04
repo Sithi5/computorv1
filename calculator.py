@@ -6,7 +6,7 @@
 #    By: mabouce <ma.sithis@gmail.com>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/01 20:27:15 by mabouce           #+#    #+#              #
-#    Updated: 2021/01/19 18:36:28 by mabouce          ###   ########.fr        #
+#    Updated: 2021/02/04 11:50:32 by mabouce          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -432,7 +432,13 @@ class _Calculator:
     def _remove_extra_zero(self, expression: str):
         pass
 
-    def solve(self, tokens: list, verbose: bool = False, internal: bool = False) -> str:
+    def solve(
+        self,
+        tokens: list,
+        verbose: bool = False,
+        force_calculator_verbose: bool = False,
+        internal: bool = False,
+    ) -> str:
         """
         Resolving str calc.
         If internal is set to true, it means that the calc is from inside the class and should check
