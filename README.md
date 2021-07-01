@@ -15,11 +15,11 @@ tools you will be able to use in seveal 42 subjects. The idea is not to "just ma
 This exercise will allow you to approach exercises that will require these skills and knowledge with a restful mind.
 Here is a non-exhaustive list of subjects that will require a basic knowledge of the
 polynomials - what they are, and how to handle them:
-• Fractol
-• RT
-• mod1
-• Expert System
-• Infin Mult.
+- Fractol
+- RT
+- mod1
+- Expert System
+- Infin Mult.
 Besides, this small subject will be completed with others, touching various subjects
 that will help you understand what you do, rather than just copy a formula you’ve found
 on the Internet.
